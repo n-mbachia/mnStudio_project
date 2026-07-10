@@ -1,0 +1,309 @@
+"""
+Storefront app — public product catalogue, live auctions, and demand waitlist.
+
+The waitlist is the Zero to One demand intelligence layer:
+  every entry captures name, email, piece of interest, budget range, and timeline —
+  giving MN Studio structured forward-looking demand data no competitor has.
+"""
+import urllib.parse
+from decimal import Decimal
+from django.db import models
+from django.utils import timezone
+from django.utils.text import slugify
+
+
+class ProductCategory(models.TextChoices):
+    DINING   = "dining",   "Dining"
+    BEDROOM  = "bedroom",  "Bedroom"
+    LIVING   = "living",   "Living Room"
+    OFFICE   = "office",   "Office"
+    OUTDOOR  = "outdoor",  "Outdoor"
+    STORAGE  = "storage",  "Storage & Shelving"
+    CUSTOM   = "custom",   "Custom Commission"
+
+
+class Product(models.Model):
+    name            = models.CharField(max_length=200)
+    slug            = models.SlugField(unique=True, blank=True)
+    description     = models.TextField()
+    category        = models.CharField(max_length=20, choices=ProductCategory.choices)
+    primary_species = models.CharField(max_length=100, blank=True,
+                                       help_text="e.g. Mvule, Mahogany, Pine")
+    
+    # --- Structured Dimension Fields ---
+    width_cm        = models.PositiveIntegerField(null=True, blank=True, help_text="Width/Length of the item in cm")
+    height_cm       = models.PositiveIntegerField(null=True, blank=True, help_text="Height of the item in cm")
+    depth_cm        = models.PositiveIntegerField(null=True, blank=True, help_text="Depth of the item in cm")
+    
+    # --- Architectural & Dimension Assets ---
+    architectural_drawing_url = models.URLField(
+        blank=True, 
+        help_text="Cloudinary URL for the architectural drawing, 2D blueprint, or dimension layout diagram"
+    )
+    
+    starting_price  = models.DecimalField(max_digits=12, decimal_places=2,
+                                           default=Decimal("0.00"))
+    lead_time_days  = models.PositiveIntegerField(default=30,
+                                                   help_text="Typical lead time in calendar days")
+    whatsapp_cta    = models.CharField(max_length=20, default="+254700000000",
+                                       help_text="WhatsApp number for enquiries (with country code)")
+    is_featured     = models.BooleanField(default=False)
+    is_active       = models.BooleanField(default=True)
+    created_at      = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-is_featured", "name"]
+        verbose_name = "Product"
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.name
+
+    @property
+    def dimensions_display(self):
+        """Returns a clean formatted string of the dimensions for the template"""
+        if self.width_cm and self.height_cm and self.depth_cm:
+            return f"{self.width_cm}W x {self.depth_cm}D x {self.height_cm}H cm"
+        return "Custom sizes available"
+
+    @property
+    def primary_image_url(self):
+        """Fixed indentation mix and streamlined fallbacks"""
+        primary_media = self.media.filter(is_primary=True).first()
+        
+        if primary_media:
+            return primary_media.thumbnail_url if primary_media.media_type == 'VIDEO' else primary_media.media_url
+
+        first_image = self.media.filter(media_type='IMAGE').first()
+        if first_image:
+            return first_image.media_url
+            
+        first_video = self.media.filter(media_type='VIDEO').first()
+        if first_video:
+            return first_video.thumbnail_url
+
+        return ""
+
+    @property
+    def whatsapp_url(self):
+        clean_number = self.whatsapp_cta.replace("+", "").replace(" ", "")
+        msg = f"Hello, I'm interested in the {self.name}. Could you share more details?"
+        return f"https://wa.me/{clean_number}?text={urllib.parse.quote(msg)}"
+
+
+class ProductMedia(models.Model):
+    IMAGE = 'IMAGE'
+    VIDEO = 'VIDEO'
+    
+    MEDIA_TYPE_CHOICES = [
+        (IMAGE, 'Image'),
+        (VIDEO, 'Video'),
+    ]
+
+    product = models.ForeignKey(
+        Product, 
+        on_delete=models.CASCADE, 
+        related_name="media"
+    )
+    media_type = models.CharField(
+        max_length=10, 
+        choices=MEDIA_TYPE_CHOICES, 
+        default=IMAGE
+    )
+    media_url = models.URLField(
+        help_text="Cloudinary URL for the image or video file"
+    )
+    thumbnail_url = models.URLField(
+        blank=True, 
+        help_text="Optional thumbnail URL, especially useful for video media"
+    )
+    caption = models.CharField(max_length=200, blank=True)
+    is_primary = models.BooleanField(
+        default=False,
+        help_text="If true, this will be the main display item (usually an image)"
+    )
+    order = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ["order"]
+        verbose_name_plural = "Product Media"
+
+    def __str__(self):
+        return f"{self.product.name} — {self.get_media_type_display()} {self.order}"
+
+
+class AuctionStatus(models.TextChoices):
+    DRAFT    = "draft",    "Draft"
+    ACTIVE   = "active",   "Active"
+    EXTENDED = "extended", "Extended (Anti-Snipe)"
+    CLOSED   = "closed",   "Closed"
+    SOLD     = "sold",     "Sold"
+
+
+class AuctionLot(models.Model):
+    title              = models.CharField(max_length=200)
+    description       = models.TextField()
+    product           = models.ForeignKey(Product, on_delete=models.SET_NULL,
+                                           null=True, blank=True)
+    image_url         = models.URLField(blank=True, help_text="Override URL if different from linked product primary media")
+    starting_bid      = models.DecimalField(max_digits=12, decimal_places=2)
+    current_bid       = models.DecimalField(max_digits=12, decimal_places=2,
+                                           default=Decimal("0.00"))
+    reserve_price     = models.DecimalField(max_digits=12, decimal_places=2,
+                                           default=Decimal("0.00"))
+    status            = models.CharField(max_length=15, choices=AuctionStatus.choices,
+                                         default=AuctionStatus.DRAFT)
+    start_time        = models.DateTimeField()
+    end_time          = models.DateTimeField()
+    anti_snipe_minutes = models.PositiveIntegerField(
+        default=5,
+        help_text="If a bid arrives in the final N minutes, extend end_time by N minutes."
+    )
+    winner            = models.ForeignKey("crm.ClientProfile", on_delete=models.SET_NULL,
+                                           null=True, blank=True, related_name="won_auctions")
+    created_at        = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-start_time"]
+        verbose_name = "Auction Lot"
+
+    def __str__(self):
+        return f"{self.title} [{self.status}]"
+
+    @property
+    def display_image_url(self):
+        """
+        Dynamically falls back to the associated product media if 
+        a distinct lot override image_url isn't defined explicitly.
+        """
+        if self.image_url:
+            return self.image_url
+        if self.product:
+            return self.product.primary_image_url
+        return ""
+
+    @property
+    def display_dimensions(self):
+        """
+        Returns dimensions specifically for this lot, falling back to 
+        the linked product dimensions if no lot-specific layout overrides exist.
+        """
+        if self.product:
+            return self.product.dimensions_display
+        return "Dimensions available on request"
+
+    @property
+    def display_blueprint_url(self):
+        """
+        Returns an architectural drawing or blueprint specifically for this auction lot.
+        Falls back to the linked product's drawing if an override isn't explicitly set.
+        """
+        # Checks if your project needs a standalone lot blueprint, otherwise falls back
+        if self.product and hasattr(self.product, 'architectural_drawing_url'):
+            return self.product.architectural_drawing_url
+        return ""
+        
+    @property
+    def is_live(self):
+        now = timezone.now()
+        return (
+            self.status in (AuctionStatus.ACTIVE, AuctionStatus.EXTENDED)
+            and self.start_time <= now <= self.end_time
+        )
+
+    @property
+    def bid_count(self):
+        return self.bids.count()
+
+    def place_bid(self, bidder, amount, phone=None, max_proxy=None):
+        if not self.is_live:
+            return False, "Auction is not currently active."
+        if amount < self.starting_bid:
+            return False, f"Bid must be at least KES {self.starting_bid:,.0f}."
+        if self.current_bid and amount <= self.current_bid:
+            return False, f"Bid must exceed current bid of KES {self.current_bid:,.0f}."
+
+        AuctionBid.objects.create(
+            lot=self,
+            bidder=bidder,
+            amount=amount,
+            bidder_phone=phone,
+            is_proxy=bool(max_proxy),
+            max_proxy_amount=max_proxy
+        )
+        self.current_bid = amount
+
+        remaining_seconds = (self.end_time - timezone.now()).total_seconds()
+        if remaining_seconds <= self.anti_snipe_minutes * 60:
+            from django.utils.timezone import timedelta
+            self.end_time += timedelta(minutes=self.anti_snipe_minutes)
+            self.status = AuctionStatus.EXTENDED
+
+        self.save()
+        return True, f"Bid of KES {amount:,.0f} placed successfully."
+
+
+class AuctionBid(models.Model):
+    lot              = models.ForeignKey(AuctionLot, on_delete=models.CASCADE,
+                                         related_name="bids")
+    bidder           = models.ForeignKey("crm.ClientProfile", on_delete=models.CASCADE)
+    bidder_phone     = models.CharField(max_length=20, blank=True, null=True, help_text="Snapshot of phone used at time of bid")
+    amount           = models.DecimalField(max_digits=12, decimal_places=2)
+    is_proxy         = models.BooleanField(default=False)
+    max_proxy_amount = models.DecimalField(max_digits=12, decimal_places=2,
+                                            null=True, blank=True)
+    placed_at        = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-amount"]
+
+    def __str__(self):
+        return f"{self.bidder.name} — KES {self.amount} on {self.lot.title}"
+
+
+class BudgetRange(models.TextChoices):
+    UNDER_50K = "under_50k", "Under KES 50,000"
+    K50_150   = "50k_150k",  "KES 50,000 – 150,000"
+    K150_300  = "150k_300k", "KES 150,000 – 300,000"
+    K300_500  = "300k_500k", "KES 300,000 – 500,000"
+    OVER_500K = "over_500k", "Over KES 50,000"
+
+
+class WaitlistStatus(models.TextChoices):
+    ACTIVE    = "active",    "Active"
+    CONTACTED = "contacted", "Contacted"
+    FOLLOW_UP = "follow up", "Follow Up"
+    CONVERTED = "converted", "Converted to Client"
+    CANCELLED = "cancelled", "Cancelled"
+
+
+class Waitlist(models.Model):
+    email             = models.EmailField(unique=True)
+    name              = models.CharField(max_length=150)
+    phone             = models.CharField(max_length=20, blank=True)
+    piece_of_interest = models.CharField(max_length=200)
+    budget_range      = models.CharField(max_length=15, choices=BudgetRange.choices)
+    timeline_months   = models.PositiveIntegerField(
+        default=3, help_text="How soon the client needs the piece (months)"
+    )
+    reference_image = models.ImageField(
+        upload_to="waitlist_references/", 
+        blank=True, 
+        null=True
+    )
+    status            = models.CharField(max_length=15, choices=WaitlistStatus.choices,
+                                         default=WaitlistStatus.ACTIVE)
+    notes             = models.TextField(blank=True)
+    created_at        = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["budget_range", "created_at"]
+        verbose_name = "Waitlist Entry"
+        verbose_name_plural = "Waitlist Entries"
+
+    def __str__(self):
+        return f"{self.name} — {self.piece_of_interest} [{self.budget_range}]"

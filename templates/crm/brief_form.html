@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Design Brief{% endblock %}
+{% block page_title %}Design Brief{% endblock %}
+{% block content %}
+<div class="max-w-2xl"><div class="card">
+  <form method="post" class="space-y-4">
+    {% csrf_token %}
+    {% for field in form %}
+    <div>
+      <label class="label">{{ field.label }}</label>
+      {{ field }}
+      {% if field.help_text %}<p class="text-xs text-stone-400 mt-1">{{ field.help_text }}</p>{% endif %}
+    </div>
+    {% endfor %}
+    <div class="flex gap-3 pt-2">
+      <button type="submit" class="btn-primary">Save Brief</button>
+      <a href="{% url 'crm:pipeline' %}" class="btn-secondary">Cancel</a>
+    </div>
+  </form>
+</div></div>
+{% endblock %}

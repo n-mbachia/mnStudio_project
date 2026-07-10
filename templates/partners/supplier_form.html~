@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}{% if object %}Edit{% else %}New{% endif %} Record{% endblock %}
+{% block page_title %}{% if object %}Edit{% else %}New{% endif %} Record{% endblock %}
+
+{% block breadcrumb %}
+<p class="text-xs text-stone-400 mt-0.5">MN Studio System Entry</p>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+  /* Automatically theme raw Django form widgets to match our system's design language */
+  .modern-form input[type="text"],
+  .modern-form input[type="number"],
+  .modern-form input[type="email"],
+  .modern-form input[type="tel"],
+  .modern-form input[type="url"],
+  .modern-form input[type="date"],
+  .modern-form select,
+  .modern-form textarea {
+    @apply w-full border border-stone-200 rounded-lg px-3.5 py-2 text-sm text-stone-800 bg-white shadow-sm transition-all;
+    @apply focus:outline-none focus:ring-2 focus:ring-mahogany-500/20 focus:border-mahogany-500;
+  }
+  .modern-form input[type="checkbox"],
+  .modern-form input[type="radio"] {
+    @apply rounded border-stone-300 text-mahogany-700 focus:ring-mahogany-500 h-4 w-4 transition-colors;
+  }
+  .modern-form textarea {
+    @apply min-h-[100px] resize-y;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+  <div class="card !p-0 overflow-hidden border border-stone-200/60 shadow-md">
+    
+    <!-- Form Aesthetic Header -->
+    <div class="px-6 py-4 border-b border-stone-100 bg-stone-50/50 flex items-center justify-between">
+      <div>
+        <h3 class="font-serif text-lg font-semibold text-stone-800">
+          {% if object %}Modify Existing Ledger File{% else %}Create New Ledger Entry{% endif %}
+        </h3>
+        <p class="text-[11px] text-stone-400 mt-0.5">Please fill out all mandatory fields accurately.</p>
+      </div>
+      <div class="w-2 h-2 rounded-full {% if object %}bg-amber-400{% else %}bg-mahogany-500{% endif %}"></div>
+    </div>
+
+    <!-- Form Content Container -->
+    <form method="post" class="modern-form p-6 space-y-5" autocomplete="off">
+      {% csrf_token %}
+      
+      <!-- Global Non-Field Errors -->
+      {% if form.non_field_errors %}
+      <div class="p-3.5 bg-red-50 border border-red-200 rounded-lg text-xs font-medium text-red-800 space-y-1">
+        {% for error in form.non_field_errors %}
+          <p>{{ error }}</p>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <!-- Loop through fields -->
+	  {% for field in form %}
+	  <div class="space-y-1.5">
+	    <div class="flex items-center justify-between">
+		  <label for="{{ field.id_for_label }}" class="label !mb-0 tracking-wide font-medium text-stone-600">
+		    {{ field.label }}
+		    {% if field.field.required %}<span class="text-mahogany-600 font-bold ml-0.5">*</span>{% endif %}
+		  </label>
+		
+		  <!-- Cleaned Error Handling -->
+		  {% if field.errors %}
+		  <span class="text-[11px] font-medium text-red-600 animate-pulse">
+		    {{ field.errors.0 }}
+		  </span>
+		  {% endif %}
+	    </div>
+	  
+	    <div class="relative rounded-lg">
+		  {{ field }}
+	    </div>
+	  
+	    {% if field.help_text %}
+	    <p class="text-[11px] text-stone-400 font-normal leading-relaxed pl-0.5">{{ field.help_text|safe }}</p>
+	    {% endif %}
+	  </div>
+	  {% endfor %}
+	    			
+      <!-- Submission Control Panel Footer -->
+      <div class="flex items-center justify-end gap-3 pt-4 border-t border-stone-100 mt-8">
+        <button type="button" onclick="history.back()" class="btn-secondary px-5 py-2">
+          Cancel
+        </button>
+        <button type="submit" class="btn-primary px-6 py-2 shadow-sm shadow-mahogany-900/10">
+          <svg class="w-4 h-4 opacity-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+          </svg>
+          <span>Save Changes</span>
+        </button>
+      </div>
+	</form>
+    
+  </div>
+</div>
+{% endblock %}
+

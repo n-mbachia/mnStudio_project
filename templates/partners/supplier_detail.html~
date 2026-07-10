@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}{{ supplier.name }}{% endblock %}
+{% block page_title %}{{ supplier.name }}{% endblock %}
+{% block header_actions %}
+<a href="{% url 'partners:supplier_update' supplier.pk %}" class="btn-secondary">Edit</a>
+<a href="{% url 'partners:po_create' %}" class="btn-primary">+ Create PO</a>
+{% endblock %}
+{% block content %}
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+  <div class="card">
+    <h3 class="font-serif text-xl mb-4">Supplier Info</h3>
+    <dl class="space-y-2 text-sm">
+      <div class="flex justify-between"><dt class="text-stone-400">Material</dt><dd>{{ supplier.get_material_type_display }}</dd></div>
+      <div class="flex justify-between"><dt class="text-stone-400">Location</dt><dd>{{ supplier.get_location_display }}</dd></div>
+      <div class="flex justify-between"><dt class="text-stone-400">Phone</dt><dd>{{ supplier.phone }}</dd></div>
+      <div class="flex justify-between"><dt class="text-stone-400">Current Rate</dt><dd class="font-semibold text-mahogany-700">KES {{ supplier.current_rate }}/unit</dd></div>
+    </dl>
+    {% if supplier.notes %}<div class="mt-4 pt-4 border-t border-stone-100"><p class="label">Notes</p><p class="text-sm text-stone-600">{{ supplier.notes }}</p></div>{% endif %}
+  </div>
+  <div class="lg:col-span-2 card">
+    <h3 class="font-serif text-xl mb-4">Recent Purchase Orders</h3>
+    <table class="w-full">
+      <thead><tr><th class="table-header">PO Number</th><th class="table-header">Status</th><th class="table-header">Amount</th><th class="table-header">Date</th></tr></thead>
+      <tbody>
+      {% for po in pos %}
+      <tr class="hover:bg-stone-50 cursor-pointer" onclick="window.location='{% url 'partners:po_detail' po.pk %}'">
+        <td class="table-cell font-mono text-xs text-mahogany-700">{{ po.po_number }}</td>
+        <td class="table-cell"><span class="badge bg-stone-100 text-stone-600">{{ po.get_status_display }}</span></td>
+        <td class="table-cell">KES {{ po.estimated_amount }}</td>
+        <td class="table-cell text-stone-400">{{ po.raised_at|date:"d M Y" }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="4" class="table-cell text-center text-stone-400 py-6">No POs yet</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

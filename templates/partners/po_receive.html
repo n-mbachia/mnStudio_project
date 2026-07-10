@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Receive {{ po.po_number }}{% endblock %}
+{% block page_title %}Mark Goods Received — {{ po.po_number }}{% endblock %}
+{% block content %}
+<div class="max-w-md"><div class="card">
+  <p class="text-sm text-stone-600 mb-6">Entering the actual unit cost at receipt will lock this price to all linked BOM entries and update the supplier's current rate.</p>
+  <form method="post" class="space-y-4">
+    {% csrf_token %}
+    <div><label class="label">{{ form.unit_cost_at_receipt.label }}</label>{{ form.unit_cost_at_receipt }}<p class="text-xs text-stone-400 mt-1">{{ form.unit_cost_at_receipt.help_text }}</p></div>
+    <div class="flex gap-3 pt-2"><button type="submit" class="btn-primary bg-forest-600 hover:bg-forest-700">Confirm Receipt & Lock Price</button><a href="{% url 'partners:po_detail' po.pk %}" class="btn-secondary">Cancel</a></div>
+  </form>
+</div></div>
+{% endblock %}

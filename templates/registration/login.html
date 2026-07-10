@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block body %}
+<div class="min-h-screen bg-charcoal-900 flex items-center justify-center p-4">
+  <div class="w-full max-w-md">
+    <div class="text-center mb-8">
+      <h1 class="font-serif text-4xl text-white tracking-wide">MN Studio</h1>
+      <p class="text-stone-400 text-sm mt-2">Business Management System</p>
+    </div>
+    <div class="bg-white rounded-2xl shadow-2xl p-8">
+      <h2 class="font-serif text-2xl text-charcoal-900 mb-6">Sign In</h2>
+      <form method="post" class="space-y-4">
+        {% csrf_token %}
+        {% if form.errors %}
+        <div class="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-lg">
+          Invalid username or password. Please try again.
+        </div>
+        {% endif %}
+        <div>
+          <label class="label">Username</label>
+          <input name="username" type="text" autocomplete="username" required
+                 class="input" placeholder="Enter your username">
+        </div>
+        <div>
+          <label class="label">Password</label>
+          <input name="password" type="password" autocomplete="current-password" required
+                 class="input" placeholder="Enter your password">
+        </div>
+        <input type="hidden" name="next" value="{{ next }}">
+        <button type="submit" class="w-full btn-primary justify-center py-3 text-base mt-2">
+          Sign In
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

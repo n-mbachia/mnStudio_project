@@ -1,0 +1,27 @@
+# Ignore Git history
+.git
+.gitignore
+
+# Ignore local Python virtual environments (Docker builds its own inside the container)
+.venv/
+venv/
+env/
+ENV/
+
+# Ignore Python caches
+**/__pycache__
+*.pyc
+
+# Ignore local SQLite files if any exist
+*.sqlite3
+
+# Ignore OS files and IDE configurations
+.vscode/
+.idea/
+.DS_Store
+*.log
+
+# Ignore Docker files themselves
+Dockerfile
+docker-compose.yml
+.dockerignore

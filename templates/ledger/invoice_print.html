@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><title>Invoice {{ invoice.invoice_id }}</title>
+  <style>
+    body { font-family: Georgia, serif; max-width: 750px; margin: 0 auto; padding: 40px; color: #1a1a1a; font-size: 14px; }
+    .header { display: flex; justify-content: space-between; margin-bottom: 40px; border-bottom: 3px solid #963d1b; padding-bottom: 20px; }
+    h1 { font-size: 32px; margin: 0; color: #963d1b; } table { width: 100%; border-collapse: collapse; }
+    th { background: #f5f5f5; padding: 10px 12px; text-align: left; font-size: 11px; text-transform: uppercase; border-bottom: 2px solid #ddd; }
+    td { padding: 10px 12px; border-bottom: 1px solid #f0f0f0; }
+    .total-row td { font-weight: bold; font-size: 16px; border-bottom: none; border-top: 2px solid #963d1b; color: #963d1b; }
+    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 32px; }
+    .info-box p { margin: 4px 0; } .label { font-size: 11px; color: #999; text-transform: uppercase; }
+    @media print { .no-print { display: none !important; } }
+  </style>
+</head>
+<body>
+<div class="no-print" style="background:#1a1a1a;color:white;padding:10px 16px;margin-bottom:20px;border-radius:6px;display:flex;justify-content:space-between">
+  <span>{{ invoice.invoice_id }}</span>
+  <button onclick="window.print()" style="background:#963d1b;color:white;border:none;padding:6px 16px;border-radius:4px;cursor:pointer">Print / Save PDF</button>
+</div>
+<div class="header">
+  <div><h1>MN Studio</h1><p style="color:#666;margin:4px 0">Bespoke Hardwood Furniture</p><p style="color:#666;margin:0">Nairobi, Kenya</p></div>
+  <div style="text-align:right">
+    <p class="label">Invoice</p>
+    <p style="font-size:22px;font-weight:bold;margin:4px 0">{{ invoice.invoice_id }}</p>
+    <p style="color:#666;margin:0">{{ invoice.created_at|date:"d F Y" }}</p>
+    {% if invoice.due_at %}<p style="color:#666;margin:4px 0">Due: {{ invoice.due_at|date:"d F Y" }}</p>{% endif %}
+  </div>
+</div>
+<div class="info-grid">
+  <div class="info-box"><p class="label">Bill To</p><p style="font-weight:bold;font-size:16px">{{ invoice.client.name }}</p><p>{{ invoice.client.phone }}</p><p>{{ invoice.client.email }}</p></div>
+  <div class="info-box"><p class="label">Job Reference</p><p style="font-weight:bold">{{ invoice.job.job_id }}</p><p class="label" style="margin-top:12px">Status</p><p>{{ invoice.get_status_display }}</p></div>
+</div>
+<table>
+  <thead><tr><th>Description</th><th style="text-align:right">Qty</th><th style="text-align:right">Unit Price</th><th style="text-align:right">Total</th></tr></thead>
+  <tbody>
+  {% for li in line_items %}<tr><td>{{ li.description }}</td><td style="text-align:right">{{ li.quantity }}</td><td style="text-align:right">KES {{ li.unit_price }}</td><td style="text-align:right">KES {{ li.total }}</td></tr>{% endfor %}
+  <tr class="total-row"><td colspan="3" style="text-align:right">Total</td><td style="text-align:right">KES {{ invoice.total }}</td></tr>
+  </tbody>
+</table>
+{% if payments %}
+<div style="margin-top:24px"><h3 style="font-size:14px;text-transform:uppercase;letter-spacing:1px;color:#666">Payments Received</h3>
+  {% for p in payments %}<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #f0f0f0;font-size:13px"><span>{{ p.get_method_display }} — {{ p.paid_at|date:"d M Y" }}{% if p.mpesa_ref %} ({{ p.mpesa_ref }}){% endif %}</span><span>KES {{ p.amount }}</span></div>{% endfor %}
+</div>{% endif %}
+<p style="text-align:center;color:#999;font-size:12px;margin-top:48px">Thank you for commissioning MN Studio · mnstudio.co.ke</p>
+</body></html>

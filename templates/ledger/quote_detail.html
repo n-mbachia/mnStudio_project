@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}{{ quote.quote_id }}{% endblock %}
+{% block page_title %}{{ quote.quote_id }}{% endblock %}
+{% block breadcrumb %}<p class="text-xs text-stone-400 mt-0.5">{{ quote.client.name }}</p>{% endblock %}
+{% block header_actions %}
+{% if quote.status == 'draft' %}
+<form method="post" action="{% url 'ledger:quote_send' quote.pk %}" class="inline">{% csrf_token %}<button class="btn-secondary">Mark Sent</button></form>
+{% endif %}
+{% if quote.status == 'sent' or quote.status == 'negotiating' %}
+<form method="post" action="{% url 'ledger:quote_approve' quote.pk %}" class="inline">{% csrf_token %}<button class="btn-primary">✓ Approve & Create Job</button></form>
+{% endif %}
+{% endblock %}
+{% block content %}
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+  <div class="lg:col-span-2 card">
+    <h3 class="font-serif text-xl mb-4">Line Items</h3>
+    <table class="w-full">
+      <thead><tr><th class="table-header">Description</th><th class="table-header">Qty</th><th class="table-header">Unit Price</th><th class="table-header">Total</th></tr></thead>
+      <tbody>
+      {% for li in line_items %}
+      <tr><td class="table-cell">{{ li.description }}</td><td class="table-cell">{{ li.quantity }}</td>
+      <td class="table-cell">KES {{ li.unit_price }}</td><td class="table-cell font-semibold">KES {{ li.total }}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% if quote.discount %}<p class="text-right text-sm text-stone-500 mt-2">Discount: KES {{ quote.discount }}</p>{% endif %}
+    <div class="text-right mt-4 pt-4 border-t border-stone-100">
+      <p class="font-serif text-2xl text-charcoal-900">Total: KES {{ quote.total }}</p>
+      <p class="text-sm text-stone-500">Deposit required: KES {{ quote.deposit_amount }}</p>
+    </div>
+  </div>
+  <div class="card">
+    <h3 class="font-serif text-xl mb-4">Status</h3>
+    <dl class="space-y-2 text-sm">
+      <div class="flex justify-between"><dt class="text-stone-400">Status</dt>
+        <dd><span class="badge bg-stone-100 text-stone-700">{{ quote.get_status_display }}</span></dd>
+      </div>
+      {% if quote.valid_until %}<div class="flex justify-between"><dt class="text-stone-400">Valid Until</dt><dd>{{ quote.valid_until|date:"d M Y" }}</dd></div>{% endif %}
+      {% if quote.sent_at %}<div class="flex justify-between"><dt class="text-stone-400">Sent</dt><dd>{{ quote.sent_at|date:"d M Y" }}</dd></div>{% endif %}
+      {% if quote.approved_at %}<div class="flex justify-between"><dt class="text-stone-400">Approved</dt><dd class="text-forest-700">{{ quote.approved_at|date:"d M Y" }}</dd></div>{% endif %}
+      {% if quote.job %}<div class="flex justify-between"><dt class="text-stone-400">Job</dt>
+        <dd><a href="{% url 'production:jobcard_detail' quote.job.pk %}" class="text-mahogany-700 hover:underline font-mono text-xs">{{ quote.job.job_id }}</a></dd>
+      </div>{% endif %}
+    </dl>
+    {% if quote.notes %}<div class="mt-4 pt-4 border-t border-stone-100"><p class="text-xs text-stone-400 mb-1 label">Notes</p><p class="text-sm text-stone-600">{{ quote.notes }}</p></div>{% endif %}
+  </div>
+</div>
+{% endblock %}

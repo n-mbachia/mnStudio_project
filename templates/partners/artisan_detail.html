@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}{{ artisan.name }}{% endblock %}
+{% block page_title %}{{ artisan.name }}{% endblock %}
+{% block content %}
+<div class="max-w-md card">
+  <dl class="space-y-3 text-sm">
+    <div class="flex justify-between"><dt class="text-stone-400">Specialty</dt><dd>{{ artisan.get_specialty_display }}</dd></div>
+    <div class="flex justify-between"><dt class="text-stone-400">Phone</dt><dd>{{ artisan.phone }}</dd></div>
+    <div class="flex justify-between"><dt class="text-stone-400">Base Rate</dt><dd class="font-semibold">KES {{ artisan.base_piece_rate }}</dd></div>
+    {% if artisan.nssf_number %}<div class="flex justify-between"><dt class="text-stone-400">NSSF No.</dt><dd class="font-mono text-xs">{{ artisan.nssf_number }}</dd></div>{% endif %}
+    {% if artisan.joined_at %}<div class="flex justify-between"><dt class="text-stone-400">Joined</dt><dd>{{ artisan.joined_at|date:"d M Y" }}</dd></div>{% endif %}
+  </dl>
+</div>
+{% endblock %}

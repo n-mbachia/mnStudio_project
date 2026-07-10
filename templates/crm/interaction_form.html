@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Log Interaction{% endblock %}
+{% block page_title %}Log Interaction{% endblock %}
+{% block content %}
+<div class="max-w-lg"><div class="card">
+  <form method="post" class="space-y-4">
+    {% csrf_token %}
+    {% for field in form %}
+    <div><label class="label">{{ field.label }}</label>{{ field }}</div>
+    {% endfor %}
+    <button type="submit" class="btn-primary">Save Interaction</button>
+  </form>
+</div></div>
+{% endblock %}

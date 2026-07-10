@@ -1,0 +1,25 @@
+# Python environment caches
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Local Virtual Environments
+.venv/
+venv/
+env/
+ENV/
+
+# Django local configuration and secrets
+.env
+db.sqlite3
+db.sqlite3-journal
+
+# Media and Static directories (usually handled outside git in production)
+/media/
+/staticfiles/
+
+# IDE / System files
+.vscode/
+.idea/
+.DS_Store
+*.log

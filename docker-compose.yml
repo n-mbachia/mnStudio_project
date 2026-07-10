@@ -1,0 +1,29 @@
+services:
+  db:
+    image: postgres:15
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=django_db
+      - POSTGRES_USER=django_user
+      - POSTGRES_PASSWORD=django_password
+    ports:
+      - "5433:5432"
+  web:
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - DB_HOST=db
+      - DB_NAME=django_db
+      - DB_USER=django_user
+      - DB_PASSWORD=django_password
+      - ALLOWED_HOSTS=localhost,127.0.0.1,web,0.0.0.0
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:

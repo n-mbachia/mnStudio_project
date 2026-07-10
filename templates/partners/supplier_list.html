@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+{% block title %}Suppliers{% endblock %}
+{% block page_title %}Suppliers Directory{% endblock %}
+
+{% block breadcrumb %}
+<p class="text-xs text-stone-400 mt-0.5">Supply Chain & Material Partners</p>
+{% endblock %}
+
+{% block header_actions %}
+<a href="{% url 'partners:supplier_create' %}" class="btn-primary shadow-sm">
+  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+  </svg>
+  <span>Add Supplier</span>
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+  
+  <!-- Mini KPI Overview Bar -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div class="bg-white p-4 rounded-xl border border-stone-200/60 shadow-sm flex items-center justify-between">
+      <div>
+        <p class="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Total Partners</p>
+        <p class="text-2xl font-serif font-semibold text-stone-800 mt-0.5">{{ suppliers|length }}</p>
+      </div>
+      <div class="p-2 bg-stone-50 rounded-lg text-stone-500">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+      </div>
+    </div>
+    <!-- Placeholder for extra quick-glance insights -->
+    <div class="bg-white p-4 rounded-xl border border-stone-200/60 shadow-sm flex items-center justify-between">
+      <div>
+        <p class="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Active Supply Hubs</p>
+        <p class="text-2xl font-serif font-semibold text-stone-800 mt-0.5">Nairobi</p>
+      </div>
+      <div class="p-2 bg-stone-50 rounded-lg text-stone-500">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+      </div>
+    </div>
+    <div class="bg-white p-4 rounded-xl border border-stone-200/60 shadow-sm flex items-center justify-between">
+      <div>
+        <p class="text-[10px] font-bold text-stone-400 uppercase tracking-wider">Primary Log Base</p>
+        <p class="text-2xl font-serif font-semibold text-stone-800 mt-0.5">Hardwoods</p>
+      </div>
+      <div class="p-2 bg-stone-50 rounded-lg text-stone-500">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- Interactive Content Card -->
+  <div class="card !p-0 overflow-hidden border border-stone-200/80">
+    
+    <!-- Filter Bar Header Header Layout -->
+    <div class="p-5 border-b border-stone-100 bg-stone-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div class="flex flex-wrap items-center gap-1.5 bg-stone-100 p-1 rounded-xl self-start">
+        <a href="?" class="px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all {% if not request.GET.type %}bg-white text-stone-900 shadow-sm{% else %}text-stone-500 hover:text-stone-900{% endif %}">
+          All Materials
+        </a>
+        <a href="?type=timber" class="px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all {% if request.GET.type == 'timber' %}bg-white text-stone-900 shadow-sm{% else %}text-stone-500 hover:text-stone-900{% endif %}">
+          Timber
+        </a>
+        <a href="?type=hardware" class="px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all {% if request.GET.type == 'hardware' %}bg-white text-stone-900 shadow-sm{% else %}text-stone-500 hover:text-stone-900{% endif %}">
+          Hardware
+        </a>
+        <a href="?type=upholstery" class="px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all {% if request.GET.type == 'upholstery' %}bg-white text-stone-900 shadow-sm{% else %}text-stone-500 hover:text-stone-900{% endif %}">
+          Upholstery
+        </a>
+        <a href="?type=finish" class="px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all {% if request.GET.type == 'finish' %}bg-white text-stone-900 shadow-sm{% else %}text-stone-500 hover:text-stone-900{% endif %}">
+          Finishes
+        </a>
+      </div>
+      
+      <div class="text-xs text-stone-400 font-medium">
+        Showing {{ suppliers|length }} source entries
+      </div>
+    </div>
+
+    <!-- Table Frame -->
+    <div class="overflow-x-auto">
+      <table class="w-full border-collapse">
+        <thead>
+          <tr class="bg-stone-50/70 border-b border-stone-100">
+            <th class="table-header pl-6">Supplier Details</th>
+            <th class="table-header">Material Classification</th>
+            <th class="table-header">Location Base</th>
+            <th class="table-header pr-6 text-right">Base Sourcing Rate</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-stone-100">
+          {% for s in suppliers %}
+          <tr class="group hover:bg-stone-50/80 transition-colors cursor-pointer" onclick="window.location='{% url 'partners:supplier_detail' s.pk %}'">
+            
+            <!-- Supplier Details Column -->
+            <td class="table-cell pl-6 py-4">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-stone-100 group-hover:bg-mahogany-50 flex items-center justify-center text-stone-600 group-hover:text-mahogany-700 transition-colors font-serif text-sm font-bold">
+                  {{ s.name|slice:":1"|upper }}
+                </div>
+                <div>
+                  <span class="font-medium text-stone-900 group-hover:text-mahogany-700 block transition-colors">{{ s.name }}</span>
+                  <span class="text-[11px] text-stone-400 block tracking-wide mt-0.5">ID: #S-00{{ s.pk }}</span>
+                </div>
+              </div>
+            </td>
+            
+            <!-- Material Classification Badge -->
+            <td class="table-cell py-4">
+              <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium tracking-wide border
+                {% if s.material_type == 'timber' %}bg-amber-50/60 text-amber-800 border-amber-100
+                {% elif s.material_type == 'hardware' %}bg-blue-50/60 text-blue-800 border-blue-100
+                {% elif s.material_type == 'upholstery' %}bg-purple-50/60 text-purple-800 border-purple-100
+                {% else %}bg-stone-100 text-stone-700 border-stone-200/60{% endif %}">
+                {{ s.get_material_type_display }}
+              </span>
+            </td>
+            
+            <!-- Location Base Details -->
+            <td class="table-cell py-4 text-stone-600">
+              <div class="flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5 text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                </svg>
+                <span>{{ s.get_location_display }}</span>
+              </div>
+            </td>
+            
+            <!-- Base Sourcing Rate Column -->
+            <td class="table-cell py-4 pr-6 text-right font-mono font-medium text-stone-900">
+              <span class="text-xs text-stone-400 font-sans mr-0.5">KES</span> {{ s.current_rate }}<span class="text-xs text-stone-400 font-sans font-normal"> / unit</span>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="4" class="table-cell text-center text-stone-400 py-16">
+              <div class="max-w-xs mx-auto flex flex-col items-center">
+                <div class="p-3 bg-stone-50 rounded-full text-stone-300 mb-3">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                </div>
+                <p class="font-medium text-stone-700 text-sm">No partners logged</p>
+                <p class="text-xs text-stone-400 mt-1">There are no suppliers registered under this matching criteria yet.</p>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

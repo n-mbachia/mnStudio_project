@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}New Lead{% endblock %}
+{% block page_title %}New Lead{% endblock %}
+{% block content %}
+<div class="max-w-lg"><div class="card">
+  <form method="post" class="space-y-4">
+    {% csrf_token %}
+    {% for field in form %}
+    <div>
+      <label class="label">{{ field.label }}</label>
+      {{ field }}
+    </div>
+    {% endfor %}
+    <div class="flex gap-3 pt-2">
+      <button type="submit" class="btn-primary">Add Lead</button>
+      <a href="{% url 'crm:pipeline' %}" class="btn-secondary">Cancel</a>
+    </div>
+  </form>
+</div></div>
+{% endblock %}

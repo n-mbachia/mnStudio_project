@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}{{ po.po_number }}{% endblock %}
+{% block page_title %}{{ po.po_number }}{% endblock %}
+{% block header_actions %}
+{% if po.status == 'raised' %}<form method="post" action="{% url 'partners:po_confirm' po.pk %}">{% csrf_token %}<button class="btn-secondary">Mark Confirmed</button></form>{% endif %}
+{% if po.status == 'confirmed' %}<a href="{% url 'partners:po_receive' po.pk %}" class="btn-primary">Mark Received</a>{% endif %}
+{% endblock %}
+{% block content %}
+<div class="max-w-xl card">
+  <dl class="space-y-3 text-sm">
+    <div class="flex justify-between border-b border-stone-50 pb-2"><dt class="text-stone-400">PO Number</dt><dd class="font-mono">{{ po.po_number }}</dd></div>
+    <div class="flex justify-between border-b border-stone-50 pb-2"><dt class="text-stone-400">Supplier</dt><dd class="font-medium"><a href="{% url 'partners:supplier_detail' po.supplier.pk %}" class="text-mahogany-700 hover:underline">{{ po.supplier.name }}</a></dd></div>
+    <div class="flex justify-between border-b border-stone-50 pb-2"><dt class="text-stone-400">Status</dt><dd><span class="badge bg-stone-100 text-stone-700">{{ po.get_status_display }}</span></dd></div>
+    <div class="flex justify-between border-b border-stone-50 pb-2"><dt class="text-stone-400">Estimated Amount</dt><dd class="font-semibold">KES {{ po.estimated_amount }}</dd></div>
+    {% if po.unit_cost_at_receipt %}<div class="flex justify-between border-b border-stone-50 pb-2"><dt class="text-stone-400">Unit Cost (Locked)</dt><dd class="font-semibold text-forest-700">KES {{ po.unit_cost_at_receipt }}/unit</dd></div>{% endif %}
+    {% if po.received_at %}<div class="flex justify-between border-b border-stone-50 pb-2"><dt class="text-stone-400">Received</dt><dd>{{ po.received_at|date:"d M Y" }}</dd></div>{% endif %}
+    <div><p class="text-stone-400 mb-1">Description</p><p>{{ po.description }}</p></div>
+  </dl>
+</div>
+{% endblock %}

@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ title }}</title>
+  <style>
+    /* Clean architectural typographic structure optimized for paper output */
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Georgia, serif;
+      color: #1c1917;
+      background-color: #ffffff;
+      margin: 0;
+      padding: 0;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .print-container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .job-card {
+      border: 2px solid #e7e5e4;
+      border-radius: 12px;
+      padding: 30px;
+      margin-bottom: 40px;
+      background: #fff;
+      /* Ensures each card splits onto its own clean page when printing */
+      page-break-after: always;
+      position: relative;
+    }
+    .header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-b: 1px solid #e7e5e4;
+      padding-bottom: 15px;
+      margin-bottom: 20px;
+    }
+    .studio-title {
+      font-family: Georgia, serif;
+      font-size: 24px;
+      margin: 0;
+      letter-spacing: -0.02em;
+    }
+    .meta-tag {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: #78716c;
+      font-weight: 600;
+    }
+    .grid-details {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 25px;
+    }
+    .data-group h4 {
+      margin: 0 0 4px 0;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #78716c;
+    }
+    .data-group p {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 500;
+    }
+    .blueprint-zone {
+      margin-top: 20px;
+      border: 1px dashed #d6d3d1;
+      border-radius: 8px;
+      padding: 10px;
+      text-align: center;
+      background: #fafaf9;
+    }
+    .blueprint-img {
+      max-width: 100%;
+      max-height: 380px;
+      object-fit: contain;
+      border-radius: 4px;
+    }
+    .notes-box {
+      margin-top: 25px;
+      border-top: 1px solid #e7e5e4;
+      padding-top: 15px;
+    }
+    
+    /* Print Utility Engine Overrides */
+    @media print {
+      body { padding: 0; background: none; }
+      .print-container { max-width: 100%; padding: 0; }
+      .no-print { display: none; }
+      .job-card {
+        border: 1px solid #000;
+        box-shadow: none;
+        margin-bottom: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Print Control Bar (Hidden on the actual physical printout) -->
+  <div class="no-print" style="background: #1c1917; padding: 12px 24px; display: flex; justify-content: space-between; align-items: center; color: #fafaf9;">
+    <span style="font-size: 12px; font-weight: 500; tracking: 0.05em;">MN STUDIO PRODUCTION QUEUE</span>
+    <button onclick="window.print();" style="background: #78716c; border: none; color: white; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px;">
+      Confirm &amp; Print Order Sheet
+    </button>
+  </div>
+
+  <div class="print-container">
+    {% for item in items %}
+    <div class="job-card">
+      <div class="header-row">
+        <div>
+          <span class="meta-tag">Commission Allocation Docket</span>
+          <h2 class="studio-title">{{ item.name }}</h2>
+        </div>
+        <div style="text-align: right;">
+          <span class="meta-tag">Date Logged</span>
+          <p style="margin: 4px 0 0 0; font-family: monospace; font-size: 13px;">{{ item.created_at|date:"Y-m-d H:i" }}</p>
+        </div>
+      </div>
+
+      <div class="grid-details">
+        <div class="data-group">
+          <h4>Client Coordinates</h4>
+          <p>{{ item.email }}</p>
+          {% if item.phone %}<p style="font-size: 13px; margin-top: 2px;">{{ item.phone }}</p>{% endif %}
+        </div>
+        <div class="data-group">
+          <h4>Target Timber Allocation</h4>
+          <p style="font-family: Georgia, serif; font-style: italic; color: #a8a29e;">{{ item.piece_of_interest }}</p>
+        </div>
+        <div class="data-group" style="margin-top: 10px;">
+          <h4>Project Financial Valuation</h4>
+          <p style="font-family: monospace;">{{ item.get_budget_range_display }}</p>
+        </div>
+        <div class="data-group" style="margin-top: 10px;">
+          <h4>Production Window</h4>
+          <p>{{ item.timeline_months }} Months Target</p>
+        </div>
+      </div>
+
+      <!-- Reference Layout Render -->
+      {% if item.reference_image %}
+      <div class="blueprint-zone">
+        <h4 style="text-align: left; margin: 0 0 8px 0; font-size: 9px; color: #78716c;">Client Attached Image Reference:</h4>
+        <img src="{{ item.reference_image.url }}" class="blueprint-img" alt="Blueprint Source">
+      </div>
+      {% else %}
+      <div class="blueprint-zone" style="padding: 30px 10px; color: #a8a29e; font-style: italic; font-size: 13px;">
+        No visual layout blueprint attached with this initialization request.
+      </div>
+      {% endif %}
+
+      <!-- Manual Workshop Review Comments Space -->
+      <div class="notes-box">
+        <h4 style="margin-bottom: 40px;">Studio Artisan Production Assessment Notes:</h4>
+        <div style="border-b: 1px dashed #d6d3d1; width: 100%; height: 20px;"></div>
+        <div style="border-b: 1px dashed #d6d3d1; width: 100%; height: 40px;"></div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+</body>
+</html>

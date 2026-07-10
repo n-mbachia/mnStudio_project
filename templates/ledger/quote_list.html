@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Quotes{% endblock %}
+{% block page_title %}Quotes{% endblock %}
+{% block header_actions %}<a href="{% url 'ledger:quote_create' %}" class="btn-primary">+ New Quote</a>{% endblock %}
+{% block content %}
+<div class="card">
+  <table class="w-full">
+    <thead><tr>
+      <th class="table-header">Quote ID</th><th class="table-header">Client</th>
+      <th class="table-header">Total</th><th class="table-header">Deposit</th>
+      <th class="table-header">Status</th><th class="table-header">Date</th>
+    </tr></thead>
+    <tbody>
+    {% for q in quotes %}
+    <tr class="hover:bg-stone-50 cursor-pointer" onclick="window.location='{% url 'ledger:quote_detail' q.pk %}'">
+      <td class="table-cell font-mono text-xs text-mahogany-700">{{ q.quote_id }}</td>
+      <td class="table-cell font-medium">{{ q.client.name }}</td>
+      <td class="table-cell font-semibold">KES {{ q.total|floatformat:0 }}</td>
+      <td class="table-cell">KES {{ q.deposit_amount|floatformat:0 }}</td>
+      <td class="table-cell">
+        <span class="badge {% if q.status == 'approved' %}bg-forest-100 text-forest-800{% elif q.status == 'sent' %}bg-blue-100 text-blue-800{% elif q.status == 'declined' %}bg-red-100 text-red-800{% else %}bg-stone-100 text-stone-600{% endif %}">
+          {{ q.get_status_display }}</span>
+      </td>
+      <td class="table-cell text-stone-400">{{ q.created_at|date:"d M Y" }}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="6" class="table-cell text-center text-stone-400 py-12">No quotes yet.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

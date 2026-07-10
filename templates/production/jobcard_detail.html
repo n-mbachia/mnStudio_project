@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+{% block title %}{{ job.job_id }}{% endblock %}
+{% block page_title %}{{ job.job_id }}{% endblock %}
+{% block breadcrumb %}<p class="text-xs text-stone-400 mt-0.5">{{ job.client.name }} — {{ job.get_status_display }}</p>{% endblock %}
+{% block header_actions %}
+<a href="{% url 'production:jobcard_print' job.pk %}" target="_blank" class="btn-secondary">🖨 Print Card</a>
+{% if not card.is_locked %}
+<form method="post" action="{% url 'production:jobcard_complete' job.pk %}" class="inline">
+  {% csrf_token %}<button class="btn-primary bg-forest-600 hover:bg-forest-700">Mark Complete</button>
+</form>
+{% else %}
+<form method="post" action="{% url 'production:jobcard_unlock' job.pk %}" class="inline">
+  {% csrf_token %}<button class="btn-primary bg-amber-600 hover:bg-amber-700">🔓 Unlock Card</button>
+</form>
+{% endif %}
+{% endblock %}
+{% block content %}
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+  <!-- COGS Summary -->
+  <div class="card">
+    <h3 class="font-serif text-xl mb-4 text-charcoal-900">Cost Intelligence</h3>
+    <div class="space-y-3 text-sm">
+      <div class="flex justify-between py-2 border-b border-stone-50">
+        <span class="text-stone-500">Quoted Price</span>
+        <span class="font-semibold">KES {{ job.quoted_price|floatformat:0 }}</span>
+      </div>
+      <div class="flex justify-between py-2 border-b border-stone-50">
+        <span class="text-stone-500">Est. COGS</span>
+        <span>KES {{ job.estimated_cogs|floatformat:0 }}</span>
+      </div>
+      <div class="flex justify-between py-2 border-b border-stone-50">
+        <span class="text-stone-500">Actual COGS</span>
+        <span class="font-semibold {% if job.actual_cogs > job.estimated_cogs %}text-red-600{% else %}text-forest-700{% endif %}">KES {{ job.actual_cogs|floatformat:0 }}</span>
+      </div>
+      <div class="flex justify-between py-2 border-b border-stone-50">
+        <span class="text-stone-500">COGS Variance</span>
+        <span class="{% if job.cogs_variance >= 0 %}text-forest-700{% else %}text-red-600{% endif %}">KES {{ job.cogs_variance|floatformat:0 }}</span>
+      </div>
+      <div class="flex justify-between py-2">
+        <span class="font-semibold text-charcoal-900">Gross Profit</span>
+        <span class="font-serif text-xl {% if job.gross_profit > 0 %}text-forest-700{% else %}text-red-600{% endif %}">KES {{ job.gross_profit|floatformat:0 }}</span>
+      </div>
+    </div>
+    <div class="mt-4 bg-stone-50 rounded-lg p-3 text-center">
+      <p class="text-xs text-stone-400">Gross Margin</p>
+      <p class="font-serif text-3xl {% if job.actual_margin_pct >= 40 %}text-forest-700{% else %}text-red-600{% endif %}">{{ job.actual_margin_pct }}%</p>
+      <p class="text-xs text-stone-400">Target: {{ job.target_margin }}%</p>
+    </div>
+    {% if not card.is_locked and card.start_date %}
+    <div class="mt-4 text-xs text-stone-400 space-y-1">
+      <p>Started: {{ card.start_date|date:"d M Y" }}</p>
+      {% if card.target_completion %}<p>Target: {{ card.target_completion|date:"d M Y" }}</p>{% endif %}
+      {% if card.actual_completion %}<p class="text-forest-600">Completed: {{ card.actual_completion|date:"d M Y" }}</p>{% endif %}
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- BOM Entries -->
+  <div class="lg:col-span-2 space-y-6">
+    <!-- Timber -->
+    <div class="card">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="font-serif text-xl text-charcoal-900">🪵 Timber</h3>
+        <span class="text-sm text-stone-400">{% for t in timber_entries %}{% if forloop.last %}{{ timber_entries|length }} entries{% endif %}{% empty %}0 entries{% endfor %}</span>
+      </div>
+      <table class="w-full text-sm mb-4">
+        <thead><tr>
+          <th class="table-header">Species</th><th class="table-header">BF</th>
+          <th class="table-header">KES/BF</th><th class="table-header">Total</th><th class="table-header">State</th>
+        </tr></thead>
+        <tbody>
+          {% for t in timber_entries %}
+          <tr class="hover:bg-stone-50">
+            <td class="table-cell font-medium">{{ t.get_species_display }}</td>
+            <td class="table-cell">{{ t.board_feet }}</td>
+            <td class="table-cell">{{ t.unit_cost_per_bf }}</td>
+            <td class="table-cell font-semibold">{{ t.total_cost }}</td>
+            <td class="table-cell"><span class="badge {% if t.state == 'actual' %}bg-forest-100 text-forest-800{% else %}bg-stone-100 text-stone-600{% endif %}">{{ t.get_state_display }}</span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% if not card.is_locked %}
+      <form method="post" action="{% url 'production:timber_add' job.pk %}" class="grid grid-cols-5 gap-2 items-end pt-3 border-t border-stone-100">
+        {% csrf_token %}
+        <div><label class="label">Species</label>{{ timber_form.species }}</div>
+        <div><label class="label">Board Feet</label>{{ timber_form.board_feet }}</div>
+        <div><label class="label">KES/BF</label>{{ timber_form.unit_cost_per_bf }}</div>
+        <div><label class="label">State</label>{{ timber_form.state }}</div>
+        <button class="btn-primary h-9">Add</button>
+      </form>
+      {% endif %}
+    </div>
+
+    <!-- Hardware -->
+    <div class="card">
+      <h3 class="font-serif text-xl text-charcoal-900 mb-4">🔩 Hardware & Fittings</h3>
+      <table class="w-full text-sm mb-4">
+        <thead><tr>
+          <th class="table-header">Item</th><th class="table-header">Qty</th>
+          <th class="table-header">Unit Cost</th><th class="table-header">Total</th><th class="table-header">State</th>
+        </tr></thead>
+        <tbody>
+          {% for h in hardware_entries %}
+          <tr class="hover:bg-stone-50">
+            <td class="table-cell">{{ h.item_name }}</td>
+            <td class="table-cell">{{ h.quantity }}</td>
+            <td class="table-cell">{{ h.unit_cost }}</td>
+            <td class="table-cell font-semibold">{{ h.total_cost }}</td>
+            <td class="table-cell"><span class="badge {% if h.state == 'actual' %}bg-forest-100 text-forest-800{% else %}bg-stone-100 text-stone-600{% endif %}">{{ h.get_state_display }}</span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% if not card.is_locked %}
+      <form method="post" action="{% url 'production:hardware_add' job.pk %}" class="grid grid-cols-4 gap-2 items-end pt-3 border-t border-stone-100">
+        {% csrf_token %}
+        <div><label class="label">Item</label>{{ hardware_form.item_name }}</div>
+        <div><label class="label">Qty</label>{{ hardware_form.quantity }}</div>
+        <div><label class="label">Unit Cost (KES)</label>{{ hardware_form.unit_cost }}</div>
+        <button class="btn-primary h-9">Add</button>
+      </form>
+      {% endif %}
+    </div>
+
+    <!-- Labour -->
+    <div class="card">
+      <h3 class="font-serif text-xl text-charcoal-900 mb-4">👷 Labour</h3>
+      <table class="w-full text-sm mb-4">
+        <thead><tr>
+          <th class="table-header">Artisan</th><th class="table-header">Task</th>
+          <th class="table-header">Piece Rate</th><th class="table-header">State</th>
+        </tr></thead>
+        <tbody>
+          {% for l in labor_entries %}
+          <tr class="hover:bg-stone-50">
+            <td class="table-cell">{{ l.artisan.name|default:"Unassigned" }}</td>
+            <td class="table-cell">{{ l.task_description }}</td>
+            <td class="table-cell font-semibold">KES {{ l.piece_rate }}</td>
+            <td class="table-cell"><span class="badge {% if l.state == 'actual' %}bg-forest-100 text-forest-800{% else %}bg-stone-100 text-stone-600{% endif %}">{{ l.get_state_display }}</span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% if not card.is_locked %}
+      <form method="post" action="{% url 'production:labor_add' job.pk %}" class="grid grid-cols-4 gap-2 items-end pt-3 border-t border-stone-100">
+        {% csrf_token %}
+        <div><label class="label">Artisan</label>{{ labor_form.artisan }}</div>
+        <div class="col-span-2"><label class="label">Task Description</label>{{ labor_form.task_description }}</div>
+        <div><label class="label">Piece Rate (KES)</label>{{ labor_form.piece_rate }}</div>
+        <button class="btn-primary h-9 col-span-4 lg:col-span-1">Add</button>
+      </form>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

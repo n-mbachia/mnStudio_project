@@ -1,0 +1,313 @@
+<!-- ./templates/storefront/home.html -->
+
+{% extends "base.html" %}
+{% block title %}MN Studio — Bespoke Hardwood Furniture, Nairobi{% endblock %}
+{% block public_content %}
+
+<!-- Hero Section -->
+<section class="relative bg-charcoal-900 min-h-[90vh] sm:min-h-screen flex items-center overflow-hidden">
+  <div class="absolute inset-0 opacity-25 bg-gradient-to-br from-mahogany-900/60 via-charcoal-900 to-slate-950"></div>
+  <div class="absolute inset-y-0 left-1/2 w-px bg-white/[0.02] hidden lg:block"></div>
+  
+  <div class="relative z-10 max-w-6xl mx-auto px-6 sm:px-8 py-20 w-full">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-16 items-center">
+      
+      <!-- Left Column: Copy & Actions -->
+      <div class="w-full">
+        <div class="inline-flex items-center gap-2 border border-mahogany-500/20 bg-mahogany-950/30 backdrop-blur-sm px-3 py-1 rounded-full mb-6">
+          <span class="w-1.5 h-1.5 rounded-full bg-mahogany-500"></span>
+          <p class="text-mahogany-500 text-xs uppercase tracking-[0.2em] font-medium">Kiambu · Est. 2024</p>
+        </div>
+        
+        <h1 class="font-serif text-5xl sm:text-6xl lg:text-7xl text-white leading-[1.05] tracking-tight mb-6">
+          Furniture <br class="hidden sm:block">
+          <span class="text-mahogany-500 italic font-normal">built to outlast</span> <br>
+          the trend.
+        </h1>
+        
+        <p class="text-stone-400 text-base max-w-lg mb-10 font-light leading-relaxed">
+          Every piece is an intentional commission — hand-shaped from sustainably sourced African hardwood, finished with organic oils, and issued with a unique Certificate of Authenticity.
+        </p>
+        
+        <div class="flex flex-col sm:flex-row flex-wrap gap-4">
+          <a href="{% url 'storefront:product_list' %}" class="inline-flex items-center justify-center gap-2 bg-mahogany-700 hover:bg-mahogany-500 text-white px-7 py-3.5 rounded-lg font-medium text-xl transition-all shadow-sm hover:shadow-mahogany-900/20 group">
+            Explore Collection 
+            <span class="transform group-hover:translate-x-1 transition-transform">→</span>
+          </a>
+          <a href="{% url 'storefront:waitlist' %}" class="inline-flex items-center justify-center gap-2 border border-white/15 text-mahogany-500 hover:text-white hover:bg-white/5 px-7 py-3.5 rounded-lg font-medium text-xl transition-all backdrop-blur-sm">
+            Request Commission
+          </a>
+        </div>
+      </div>
+      
+      <!-- Right Column: Interactive Linked Feature Image / Video -->
+      <div class="w-full lg:px-4">
+        {% if hero_product %}
+        <a href="{% url 'storefront:product_detail' hero_product.slug %}" class="block group relative aspect-[4/5] sm:aspect-[4/3] md:aspect-[3/4] rounded-2xl overflow-hidden border border-mahogany-500/40 bg-charcoal-950 shadow-2xl transition-all duration-500 hover:border-mahogany-500/50 hover:shadow-mahogany-950/40">
+    
+          {% if hero_media %}
+            {% if hero_media.media_type == 'VIDEO' %}
+              <video src="{{ hero_media.media_url }}" class="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-700 ease-out opacity-70 group-hover:opacity-60" autoplay muted loop playsinline></video>
+            {% else %}
+              <img src="{{ hero_media.media_url }}" alt="{{ hero_product.name }}" class="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-103 opacity-70 group-hover:opacity-60">
+            {% endif %}
+          {% else %}
+            <div class="absolute inset-0 w-full h-full bg-charcoal-900 flex items-center justify-center p-12 transition-transform duration-700 ease-out group-hover:scale-102">
+              <img src="https://res.cloudinary.com/famfef4z/image/upload/v1783431102/mnStudio_ijiqh7.png" alt="MN Studio Archival Insignia" class="w-auto max-h-400 object-contain opacity-40 group-hover:opacity-50 transition-opacity">
+            </div>
+          {% endif %}
+
+          <div class="absolute inset-0 bg-gradient-to-t from-charcoal-950 via-charcoal-950/40 to-transparent z-10"></div>
+          <div class="absolute inset-4 border border-white/10 rounded-xl z-20 pointer-events-none transition-all duration-500 group-hover:border-mahogany-500/20"></div>
+
+          <div class="absolute inset-0 flex flex-col items-center justify-center p-8 text-center z-20">
+            <p class="text-[10px] uppercase tracking-[0.3em] text-stone-400 font-mono block mb-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">View Master Piece</p>
+            <p class="text-stone-300 text-xs mt-1 font-light opacity-0 group-hover:opacity-100 transition-opacity duration-300 max-w-xs">Click to view artisan joinery configurations</p>
+          </div>
+
+          <div class="absolute bottom-8 left-8 right-8 z-20 flex items-center justify-between text-left">
+            <div>
+              <span class="text-[9px] font-bold uppercase tracking-widest text-mahogany-400 block mb-0.5">Featured Commission</span>
+              <span class="text-base text-white font-serif tracking-wide block leading-tight">{{ hero_product.name }}</span>
+              <span class="text-xs text-stone-300 font-light font-serif italic mt-0.5 block">{{ hero_product.primary_species|default:"Kenyan Hardwood Stock" }}</span>
+            </div>
+            <span class="w-9 h-9 rounded-full border border-white/15 flex items-center justify-center text-white bg-charcoal-900/80 backdrop-blur-md transition-all group-hover:bg-mahogany-700 group-hover:border-mahogany-600 shrink-0 ml-4">
+              &rarr;
+            </span>
+          </div>
+        </a>
+        {% else %}
+        <a href="{% url 'storefront:product_list' %}" class="block group relative aspect-[4/5] sm:aspect-[4/3] md:aspect-[3/4] rounded-2xl overflow-hidden border border-white/10 bg-gradient-to-b from-white/[0.03] to-white/[0.01] backdrop-blur-sm shadow-2xl flex flex-col items-center justify-center p-12 text-center">
+          <img src="https://res.cloudinary.com/famfef4z/image/upload/v1783431102/mnStudio_ijiqh7.png" alt="MN Studio Insignia" class="w-auto max-h-600 object-contain opacity-20 mb-4">
+          <p class="font-serif text-xl text-mahogany-500 italic tracking-wide">Curation collection loading...</p>
+        </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Product Registry Preview Section -->
+<section class="bg-stone-50 py-24 px-6 sm:px-8 border-b border-stone-200/50">
+  <div class="max-w-5xl mx-auto">
+    <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-12 gap-4">
+      <div>
+        <h2 class="font-serif text-3xl sm:text-4xl text-charcoal-900 tracking-tight">The Registry</h2>
+        <p class="text-stone-500 text-sm mt-1">Starting prices for bespoke configurations.</p>
+      </div>
+      <div class="h-px bg-stone-200 flex-1 mx-8 hidden md:block"></div>
+      <a href="{% url 'storefront:product_list' %}" class="text-sm font-medium text-mahogany-500 hover:text-mahogany-700 transition-colors shrink-0 hidden sm:block">
+        View full catalog &rarr;
+      </a>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      {% for product in featured %}
+      <a href="{% url 'storefront:product_detail' product.slug %}" class="group bg-white rounded-xl overflow-hidden border border-stone-200/60 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col h-full">
+        
+        <!-- Flashable Media Presentation Block -->
+        <div class="relative aspect-[4/3] bg-stone-100 flex items-center justify-center overflow-hidden border-b border-stone-100 image-flash-container">
+          {% if product.media.all %}
+            {% for item in product.media.all %}
+              {% if item.media_type == 'VIDEO' %}
+                <video src="{{ item.media_url }}" 
+                       class="flash-slide absolute inset-0 w-full h-full object-cover object-center transform group-hover:scale-105 transition-all duration-1000 ease-in-out {% if forloop.first %}opacity-100 z-10{% else %}opacity-0 z-0{% endif %}" autoplay muted loop playsinline></video>
+              {% else %}
+                <img src="{{ item.media_url }}" 
+                     alt="{{ product.name }}" 
+                     class="flash-slide absolute inset-0 w-full h-full object-cover object-center transform group-hover:scale-105 transition-all duration-1000 ease-in-out {% if forloop.first %}opacity-100 z-10{% else %}opacity-0 z-0{% endif %}">
+              {% endif %}
+            {% endfor %}
+            <div class="absolute inset-0 bg-gradient-to-t from-stone-900/10 to-transparent mix-blend-multiply z-20 pointer-events-none"></div>
+          {% else %}
+            <div class="absolute inset-0 bg-gradient-to-t from-stone-900/5 to-transparent mix-blend-multiply"></div>
+            <div class="text-center p-6 transform group-hover:scale-105 transition-transform duration-500">
+              <span class="text-[10px] uppercase tracking-widest text-stone-400 font-mono block mb-1">Material Origin</span>
+              <span class="font-serif text-stone-600 text-sm italic">{{ product.primary_species|default:"Kenyan Hardwood" }}</span>
+            </div>
+          {% endif %}
+        </div>
+        
+        <div class="p-6 flex flex-col flex-1">
+          <span class="text-[10px] text-mahogany-600 font-bold uppercase tracking-[0.15em] mb-1.5 block">
+            {{ product.get_category_display }}
+          </span>
+          <h3 class="font-serif text-xl text-charcoal-900 group-hover:text-mahogany-700 transition-colors line-clamp-1">
+            {{ product.name }}
+          </h3>
+          
+          <div class="mt-auto pt-6 border-t border-stone-100 flex items-center justify-between">
+            <div>
+              <p class="text-[10px] font-bold uppercase tracking-wider text-stone-400">Estimate</p>
+              <p class="text-sm font-semibold text-charcoal-800 mt-0.5">KES {{ product.starting_price|floatformat:0 }}</p>
+            </div>
+            <div class="text-right">
+              <p class="text-[10px] font-bold uppercase tracking-wider text-stone-400">Lead Time</p>
+              <p class="text-xs text-stone-600 mt-0.5">~{{ product.lead_time_days }} Days</p>
+            </div>
+          </div>
+        </div>
+      </a>
+      {% empty %}
+      <div class="col-span-3 text-center text-stone-400 py-16 border border-dashed border-stone-200 rounded-xl bg-white">
+        <p class="font-serif italic text-lg text-stone-500">A new collection is taking shape.</p>
+        <p class="text-xs text-stone-400 mt-1">Check back soon or join our private mailing list.</p>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="text-center mt-12 sm:hidden">
+      <a href="{% url 'storefront:product_list' %}" class="w-full justify-center inline-flex items-center gap-2 bg-white hover:bg-stone-50 text-stone-700 text-sm font-medium px-4 py-2.5 rounded-lg border border-stone-200 shadow-sm transition-colors">
+        Browse Full Collection &rarr;
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Live Auctions Section -->
+{% if active_auctions %}
+<section class="bg-charcoal-900 py-24 px-6 sm:px-8 relative overflow-hidden">
+  <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(184,79,32,0.08),transparent_45%)]"></div>
+  
+  <div class="max-w-5xl mx-auto relative z-10">
+    <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-12 gap-4">
+      <div>
+        <div class="flex items-center gap-2 mb-2">
+          <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+          <h2 class="font-serif text-3xl text-white tracking-tight">Studio Vault Auctions</h2>
+        </div>
+        <p class="text-stone-400 text-sm">One-of-a-kind bespoke immediate-release pieces.</p>
+      </div>
+    </div>
+
+    <!-- Active Auction Lots Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {% for lot in active_auctions %}
+      <a href="{% url 'storefront:auction_detail' lot.pk %}" class="bg-white/[0.02] border border-mahogany-300 rounded-xl p-5 hover:bg-white/[0.05] hover:border-white/20 transition-all duration-300 flex flex-col justify-between group overflow-hidden">
+        <div>
+          <!-- Smart Media Showcase Frame -->
+          <div class="w-full aspect-[4/3] rounded-lg overflow-hidden bg-charcoal-950 border border-white/5 relative mb-4">
+            {% if lot.image_url %}
+              <img src="{{ lot.image_url }}" alt="{{ lot.title }}" class="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105 opacity-80 group-hover:opacity-90">
+            {% elif lot.product and lot.product.media.first %}
+              {% with lot.product.media.first as initial_media %}
+                {% if initial_media.media_type == 'VIDEO' %}
+                  <video src="{{ initial_media.media_url }}" class="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105 opacity-75 group-hover:opacity-85" autoplay muted loop playsinline></video>
+                {% else %}
+                  <img src="{{ initial_media.media_url }}" alt="{{ lot.title }}" class="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105 opacity-80 group-hover:opacity-90">
+                {% endif %}
+              {% endwith %}
+            {% else %}
+              <div class="absolute inset-0 w-full h-full flex items-center justify-center bg-charcoal-950">
+                <img src="https://res.cloudinary.com/famfef4z/image/upload/v1783431102/mnStudio_ijiqh7.png" alt="MN Studio Fallback" class="w-auto max-h-10 object-contain opacity-15">
+              </div>
+            {% endif %}
+            <div class="absolute inset-0 bg-gradient-to-t from-charcoal-950/40 via-transparent to-transparent z-10 pointer-events-none"></div>
+          </div>
+
+          <!-- Text Block -->
+          <h3 class="font-serif text-lg text-white mb-1 group-hover:text-mahogany-300 transition-colors duration-300">{{ lot.title }}</h3>
+          <div class="flex items-center gap-2 mb-4">
+            <span class="text-xs text-stone-400 font-mono">{{ lot.bid_count }} dynamic bids</span>
+          </div>
+        </div>
+        
+        <!-- Bottom Pricing Ledger Section -->
+        <div class="pt-4 border-t border-white/5 flex items-end justify-between">
+          <div>
+            <span class="text-[10px] font-bold uppercase tracking-wider text-mahogany-300 block mb-0.5">Current Bid</span>
+            <span class="text-white font-serif font-medium text-base">KES {{ lot.current_bid|floatformat:0 }}</span>
+          </div>
+          <div class="text-right">
+            <span class="text-[10px] font-bold uppercase tracking-wider text-mahogany-300 block mb-0.5">Closing Date</span>
+            <span class="text-xs text-stone-300 font-mono">{{ lot.end_time|date:"d M, H:i" }}</span>
+          </div>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+
+    <div class="text-center mt-12">
+      <a href="{% url 'storefront:auction_list' %}" class="inline-flex items-center gap-2 border border-mahogany-300 text-stone-300 hover:text-white hover:bg-white/5 px-6 py-3 rounded-lg text-sm font-medium transition-colors">
+        View All Studio Vault Lots
+      </a>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- Waitlist Call to Action Section -->
+<section class="bg-mahogany-700 py-24 px-6 sm:px-8 text-center relative overflow-hidden">
+  <div class="absolute inset-0 bg-gradient-to-b from-black/10 to-transparent"></div>
+  <div class="max-w-2xl mx-auto relative z-10">
+    <h2 class="font-serif text-4xl sm:text-5xl text-white mb-4 tracking-tight leading-tight">
+      Commissions are <br class="sm:hidden"> currently limited.
+    </h2>
+    <p class="text-mahogany-100 text-base sm:text-lg mb-10 max-w-xl mx-auto font-light leading-relaxed">
+      To honor architectural joinery standards and timber curation timelines, we cycle a fixed roster of open commissions annually. Secure your placement below.
+    </p>
+    <a href="{% url 'storefront:waitlist' %}" class="inline-flex items-center gap-2 bg-white text-mahogany-500 hover:bg-stone-100 px-8 py-4 rounded-lg font-medium text-xl shadow-md transition-colors">
+      Join the Studio Waitlist &rarr;
+    </a>
+  </div>
+</section>
+
+<!-- Footer Section -->
+<footer class="bg-charcoal-900 pt-20 pb-12 px-6 sm:px-8 border-t border-white/5">
+  <div class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-12 mb-16">
+    <div class="md:col-span-2">
+      <h3 class="font-serif text-2xl text-mahogany-500 tracking-wide mb-3">MN Studio</h3>
+      <p class="text-stone-400 text-sm max-w-sm font-light leading-relaxed">
+        Sustainably engineering and celebrating heirloom-grade Kenyan hardwood furniture artifacts from our workshop in Nairobi.
+      </p>
+    </div>
+    <div>
+      <p class="text-xs font-bold uppercase tracking-widest text-mahogany-500 mb-4">Studio Navigation</p>
+      <ul class="space-y-2 text-sm text-stone-400 font-light">
+        <li><a href="{% url 'storefront:product_list' %}" class="hover:text-white transition-colors">The Registry Collection</a></li>
+        <li><a href="{% url 'storefront:auction_list' %}" class="hover:text-white transition-colors">Vault Auctions</a></li>
+        <li><a href="{% url 'storefront:waitlist' %}" class="hover:text-white transition-colors">Commission Allocations</a></li>
+      </ul>
+    </div>
+  </div>
+  
+  <div class="max-w-5xl mx-auto pt-8 border-t border-white/5 flex flex-col sm:flex-row justify-between items-center gap-4">
+    <p class="text-xs text-stone-500 font-light">© 2026 MN Studio. All rights reserved.</p>
+    <div>
+      {% if user.is_authenticated %}
+      <a href="{% url 'dashboard' %}" class="text-xs text-stone-500 hover:text-stone-300 transition-colors flex items-center gap-1.5">
+        <span class="w-1 h-1 rounded-full bg-emerald-500"></span> Terminal Console &rarr;
+      </a>
+      {% else %}
+      <a href="{% url 'login' %}" class="text-xs text-stone-500 hover:text-stone-300 transition-colors">
+        Internal Studio Login &rarr;
+      </a>
+      {% endif %}
+    </div>
+  </div>
+</footer>
+
+<!-- Smooth Flash Transition Logic Script -->
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const containers = document.querySelectorAll('.image-flash-container');
+    
+    containers.forEach(container => {
+      const slides = container.querySelectorAll('.flash-slide');
+      if (slides.length <= 1) return;
+
+      let currentIdx = 0;
+      setInterval(() => {
+        slides[currentIdx].classList.remove('opacity-100', 'z-10');
+        slides[currentIdx].classList.add('opacity-0', 'z-0');
+
+        currentIdx = (currentIdx + 1) % slides.length;
+
+        slides[currentIdx].classList.remove('opacity-0', 'z-0');
+        slides[currentIdx].classList.add('opacity-100', 'z-10');
+      }, 4000);
+    });
+  });
+</script>
+
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}{% if object %}Edit {{ object.name }}{% else %}New Client{% endif %}{% endblock %}
+{% block page_title %}{% if object %}Edit Client{% else %}New Client{% endif %}{% endblock %}
+{% block content %}
+<div class="max-w-2xl">
+  <div class="card">
+    <form method="post" class="space-y-5">
+      {% csrf_token %}
+      <div class="grid grid-cols-2 gap-4">
+        <div class="col-span-2">
+          <label class="label">Full Name</label>
+          <input name="name" value="{{ form.name.value|default:'' }}" class="input" required>
+        </div>
+        <div>
+          <label class="label">Email</label>
+          <input name="email" type="email" value="{{ form.email.value|default:'' }}" class="input" required>
+        </div>
+        <div>
+          <label class="label">Phone</label>
+          <input name="phone" value="{{ form.phone.value|default:'' }}" class="input" required placeholder="+254…">
+        </div>
+        <div>
+          <label class="label">County</label>
+          <input name="county" value="{{ form.county.value|default:'' }}" class="input" placeholder="e.g. Nairobi">
+        </div>
+        <div>
+          <label class="label">Acquisition Source</label>
+          {{ form.acquisition_source }}
+        </div>
+        <div class="col-span-2">
+          <label class="label">Preference Notes</label>
+          <textarea name="preference_notes" rows="3" class="input" placeholder="Species, style, budget hints…">{{ form.preference_notes.value|default:'' }}</textarea>
+        </div>
+        <div class="flex items-center gap-2">
+          <input type="checkbox" name="is_vip" id="is_vip" {% if form.is_vip.value %}checked{% endif %} class="rounded border-stone-300">
+          <label for="is_vip" class="text-sm text-charcoal-800 font-medium">VIP Client</label>
+        </div>
+      </div>
+      <div class="flex gap-3 pt-2">
+        <button type="submit" class="btn-primary">{% if object %}Save Changes{% else %}Create Client{% endif %}</button>
+        <a href="{% url 'crm:client_list' %}" class="btn-secondary">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

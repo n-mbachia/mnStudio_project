@@ -1,0 +1,122 @@
+<!-- ./storefront/templates/product_list.html -->
+
+{% extends "base.html" %}
+{% block title %}The Signature Registry Collection — MN Studio{% endblock %}
+{% block public_content %}
+
+<div class="min-h-screen bg-stone-50 text-charcoal-900">
+  
+  <!-- Premium Header Banner -->
+  <div class="bg-charcoal-900 text-stone-100 py-20 px-6 sm:px-8 relative overflow-hidden">
+    <!-- Subtle architectural background line accents -->
+    <div class="absolute inset-y-0 left-1/4 w-px bg-white/[0.02] pointer-events-none hidden lg:block"></div>
+    <div class="absolute inset-y-0 left-3/4 w-px bg-white/[0.02] pointer-events-none hidden lg:block"></div>
+    <div class="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,rgba(184,79,32,0.04),transparent_40%)]"></div>
+
+    <div class="max-w-5xl mx-auto relative z-10">
+      <a href="{% url 'home' %}" class="inline-flex items-center gap-1.5 text-stone-400 text-xs font-medium uppercase tracking-wider hover:text-white transition-colors group">
+        <span class="transform group-hover:-translate-x-1 transition-transform">&larr;</span> Return to Home
+      </a>
+      <h1 class="font-serif text-4xl sm:text-5xl text-white tracking-tight mt-6 mb-4">
+        The Registry <span class="italic font-normal text-mahogany-300">Collection</span>
+      </h1>
+      <p class="text-stone-400 text-sm font-light max-w-xl leading-relaxed">
+        Explore archival blueprints designed for lifetime custom commissions. Every piece is precision hand-shaped to specification from premium sustainably-sourced timber options.
+      </p>
+    </div>
+  </div>
+
+  <!-- Main Component Area -->
+  <div class="max-w-5xl mx-auto px-6 sm:px-8 py-12">
+    
+    <!-- Sophisticated Category Filter Tab Ribbon -->
+    <div class="flex flex-wrap items-center gap-2 mb-10 pb-2 border-b border-stone-200/60">
+      <a href="{% url 'storefront:product_list' %}" class="px-4 py-1.5 rounded-full text-xs uppercase tracking-wider font-semibold transition-all {% if not request.GET.cat %}bg-charcoal-900 text-white shadow-sm{% else %}bg-white text-stone-600 border border-stone-200 hover:bg-stone-100 hover:text-charcoal-900{% endif %}">
+        All Blueprints
+      </a>
+      {% for val, label in categories %}
+      <a href="?cat={{ val }}" class="px-4 py-1.5 rounded-full text-xs uppercase tracking-wider font-semibold transition-all {% if request.GET.cat == val %}bg-charcoal-900 text-white shadow-sm{% else %}bg-white text-stone-600 border border-stone-200 hover:bg-stone-100 hover:text-charcoal-900{% endif %}">
+        {{ label }}
+      </a>
+      {% endfor %}
+    </div>
+
+    <!-- Product Blueprint Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      {% for product in products %}
+      <a href="{% url 'storefront:product_detail' product.slug %}" class="group bg-white rounded-2xl overflow-hidden border border-stone-200/60 shadow-sm hover:shadow-xl hover:border-stone-300/80 transition-all duration-300 flex flex-col h-full">
+        
+        <!-- Media Grid Box Frame -->
+        <div class="relative aspect-[4/3] bg-stone-100 flex items-center justify-center overflow-hidden border-b border-stone-100/80">
+          {% if product.media.exists %}
+            {% with product.media.first as initial_media %}
+              {% if initial_media.media_type == 'VIDEO' %}
+                <video src="{{ initial_media.media_url }}" class="absolute inset-0 w-full h-full object-cover object-center transform group-hover:scale-105 transition-transform duration-700" autoplay muted loop playsinline></video>
+              {% else %}
+                <img src="{{ initial_media.media_url }}" alt="{{ product.name }}" class="absolute inset-0 w-full h-full object-cover object-center transform group-hover:scale-105 transition-transform duration-700">
+              {% endif %}
+            {% endwith %}
+            <div class="absolute inset-0 bg-gradient-to-t from-stone-900/5 via-transparent to-transparent mix-blend-multiply z-10 pointer-events-none"></div>
+          {% else %}
+            <!-- Minimal Archetype Fallback if image asset is pending -->
+            <div class="absolute inset-0 bg-gradient-to-tr from-stone-50 to-stone-100/60 flex flex-col items-center justify-center p-4">
+              <span class="w-10 h-10 border border-stone-200/80 rounded-full flex items-center justify-center text-stone-400 font-mono text-[10px] mb-2">📐</span>
+              <span class="font-serif text-stone-400 text-xs italic">{{ product.primary_species|default:"Hardwood Base" }}</span>
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- Meta Specification Body Card -->
+        <div class="p-6 flex flex-col flex-grow justify-between">
+          <div>
+            <span class="text-[9px] font-bold uppercase tracking-widest text-mahogany-600 block mb-1">
+              {{ product.get_category_display }}
+            </span>
+            <h3 class="font-serif text-xl text-charcoal-900 tracking-wide group-hover:text-mahogany-700 transition-colors mb-0.5">
+              {{ product.name }}
+            </h3>
+            <span class="text-[11px] text-stone-400 font-serif italic block mb-3">
+              Timber Spec: {{ product.primary_species|default:"Custom Selection Available" }}
+            </span>
+            <p class="text-stone-500 text-xs font-light leading-relaxed line-clamp-3 mb-6">
+              {{ product.description }}
+            </p>
+          </div>
+
+          <!-- Price Ledger Footnote Section -->
+          <div class="pt-4 border-t border-stone-100 flex items-center justify-between text-xs">
+            <div>
+              <span class="text-[9px] uppercase tracking-wider text-stone-400 block mb-0.5">Base Structure</span>
+              <span class="font-mono font-semibold text-charcoal-900 text-sm">KES {{ product.starting_price|floatformat:0 }}</span>
+            </div>
+            <div class="text-right">
+              <span class="text-[9px] uppercase tracking-wider text-stone-400 block mb-0.5">Est. Cycles</span>
+              <span class="text-stone-600 font-medium font-mono">{{ product.lead_time_days }} Days</span>
+            </div>
+          </div>
+        </div>
+
+      </a>
+      {% empty %}
+      <!-- Empty Portfolio Loop Fallback Box -->
+      <div class="col-span-1 md:col-span-2 lg:col-span-3 border border-dashed border-stone-300 rounded-2xl py-24 px-6 text-center bg-white/50">
+        <div class="w-12 h-12 border border-stone-200 rounded-full flex items-center justify-center text-stone-400 mx-auto mb-4 font-mono text-xs shadow-sm bg-white">
+          01
+        </div>
+        <p class="font-serif text-2xl text-stone-700 italic">Registry slots loading...</p>
+        <p class="text-stone-400 text-xs font-light mt-1 max-w-xs mx-auto leading-relaxed">
+          We are currently updating our architectural blueprints for this specific collection tier.
+        </p>
+        <div class="mt-6">
+          <a href="{% url 'storefront:waitlist' %}" class="inline-flex items-center gap-1.5 bg-charcoal-900 hover:bg-charcoal-800 text-white px-5 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors shadow-sm">
+            Join Waitlist Alert &rarr;
+          </a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Suppliers{% endblock %}
+{% block page_title %}Suppliers{% endblock %}
+{% block header_actions %}<a href="{% url 'partners:supplier_create' %}" class="btn-primary">+ Add Supplier</a>{% endblock %}
+
+{% block content %}
+<div class="card">
+  <!-- Cleaned Filter Row -->
+  <div class="flex gap-2 mb-6">
+    <a href="?type=timber" class="px-3 py-1.5 bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-medium rounded-lg transition-colors">Timber</a>
+    <a href="?type=hardware" class="px-3 py-1.5 bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-medium rounded-lg transition-colors">Hardware</a>
+    <a href="?type=upholstery" class="px-3 py-1.5 bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-medium rounded-lg transition-colors">Upholstery</a>
+    <a href="?type=finish" class="px-3 py-1.5 bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-medium rounded-lg transition-colors">Finishes</a>
+  </div>
+
+  <table class="w-full">
+    <thead>
+      <tr>
+        <th class="table-header">Name</th>
+        <th class="table-header">Type</th>
+        <th class="table-header">Location</th>
+        <th class="table-header">Current Rate</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for s in suppliers %}
+    <tr class="hover:bg-stone-50 cursor-pointer" onclick="window.location='{% url 'partners:supplier_detail' s.pk %}'">
+      <td class="table-cell font-medium text-mahogany-700">{{ s.name }}</td>
+      <td class="table-cell capitalize">{{ s.get_material_type_display }}</td>
+      <td class="table-cell">{{ s.get_location_display }}</td>
+      <td class="table-cell font-semibold">KES {{ s.current_rate }}/unit</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="4" class="table-cell text-center text-stone-400 py-10">No suppliers yet.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

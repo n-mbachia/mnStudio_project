@@ -1,0 +1,129 @@
+/*
+ * MN Studio — Custom CSS overrides
+ * Tailwind handles the heavy lifting; this file covers bespoke tweaks.
+ */
+
+/* Form field styling — Tailwind doesn't style form inputs by default */
+select, input[type="text"], input[type="email"], input[type="number"],
+input[type="date"], input[type="datetime-local"], input[type="password"],
+textarea {
+  display: block;
+  width: 100%;
+  border: 1px solid #e7e5e4;
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  font-family: 'Jost', system-ui, sans-serif;
+  color: #1a1a1a;
+  background-color: #ffffff;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  -webkit-appearance: none;
+}
+
+select:focus, input:focus, textarea:focus {
+  outline: none;
+  border-color: #963d1b;
+  box-shadow: 0 0 0 3px rgba(150, 61, 27, 0.12);
+}
+
+/* Sidebar active state glow */
+.sidebar-link {
+    @apply group relative flex items-center gap-3
+           px-4 py-3
+           rounded-xl
+           text-slate-300
+           font-medium
+           tracking-wide
+           transition-all duration-200 ease-out
+           hover:bg-white/10
+           hover:text-white
+           hover:translate-x-1;
+}
+
+.sidebar-link svg {
+    @apply h-5 w-5
+           shrink-0
+           text-slate-500
+           transition-all duration-200;
+}
+
+.sidebar-link:hover svg {
+    @apply text-amber-400
+           scale-110;
+}
+
+.sidebar-link.active {
+    @apply bg-gradient-to-r
+           from-amber-500
+           to-yellow-400
+           text-slate-950
+           shadow-lg
+           shadow-amber-500/25
+           ring-1
+           ring-amber-300/30;
+}
+
+.sidebar-link.active svg {
+    @apply text-slate-950;
+}
+
+.sidebar-link.active::before {
+    content: "";
+    @apply absolute
+           left-0
+           top-2
+           bottom-2
+           w-1
+           rounded-r-full
+           bg-white;
+}
+
+.sidebar-link:focus-visible {
+    @apply outline-none
+           ring-2
+           ring-amber-400
+           ring-offset-2
+           ring-offset-slate-950;
+}
+
+/* Table hover row */
+tbody tr:hover {
+  background-color: #fafaf9;
+}
+
+/* Print utilities */
+@media print {
+  .no-print { display: none !important; }
+  body { font-size: 12px; }
+}
+
+/* Auction countdown pulse */
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+.auction-live {
+  animation: pulse-soft 2s ease-in-out infinite;
+}
+
+/* Job Card lock/unlock indicator */
+.lock-indicator-locked  { color: #d97706; }
+.lock-indicator-open    { color: #16a34a; }
+
+/* Certificate border decoration */
+.certificate-border {
+  border: 3px solid #963d1b;
+  padding: 2rem;
+  position: relative;
+}
+.certificate-border::before, .certificate-border::after {
+  content: "";
+  position: absolute;
+  width: 12px; height: 12px;
+  background: #963d1b;
+  top: -4px; left: -4px;
+}
+.certificate-border::after {
+  top: auto; left: auto;
+  bottom: -4px; right: -4px;
+}

@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+{% block title %}Operations Dashboard — MN Studio{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+{% block breadcrumb %}<p class="text-xs text-stone-400 mt-1 uppercase tracking-wider font-mono">{{ current_month }} Overview</p>{% endblock %}
+
+{% block content %}
+<!-- Architectural KPI Metrics Row -->
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+  <div class="bg-white rounded-xl border border-stone-200/60 p-5 shadow-sm">
+    <p class="text-[10px] text-stone-400 uppercase tracking-widest font-semibold mb-1">Revenue (Month)</p>
+    <p class="font-serif text-2xl sm:text-3xl text-charcoal-900 tracking-tight">KES {{ month_revenue|floatformat:0 }}</p>
+  </div>
+  <div class="bg-white rounded-xl border border-stone-200/60 p-5 shadow-sm">
+    <p class="text-[10px] text-stone-400 uppercase tracking-widest font-semibold mb-1">Active Jobs</p>
+    <p class="font-serif text-2xl sm:text-3xl text-mahogany-600 tracking-tight">{{ active_jobs }}</p>
+  </div>
+  <div class="bg-white rounded-xl border border-stone-200/60 p-5 shadow-sm">
+    <p class="text-[10px] text-stone-400 uppercase tracking-widest font-semibold mb-1">Completed</p>
+    <p class="font-serif text-2xl sm:text-3xl text-forest-600 tracking-tight">{{ completed_jobs }}</p>
+  </div>
+  <div class="bg-white rounded-xl border border-stone-200/60 p-5 shadow-sm">
+    <p class="text-[10px] text-stone-400 uppercase tracking-widest font-semibold mb-1">Total Workspace Lots</p>
+    <p class="font-serif text-2xl sm:text-3xl text-charcoal-900 tracking-tight">{{ total_jobs }}</p>
+  </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+  
+  <!-- Main Grid Column: Active Production Pipeline -->
+  <div class="lg:col-span-2 bg-white rounded-xl border border-stone-200/60 p-6 shadow-sm flex flex-col justify-between">
+    <div>
+      <div class="flex items-center justify-between mb-6 pb-2 border-b border-stone-100">
+        <h3 class="font-serif text-lg text-charcoal-900 tracking-wide">Active Production Pipeline</h3>
+        <a href="{% url 'crm:pipeline' %}" class="text-stone-400 hover:text-charcoal-900 text-xs font-semibold uppercase tracking-wider transition-colors">
+          View Ledger &rarr;
+        </a>
+      </div>
+      
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="border-b border-stone-100">
+              <th class="py-3 text-[10px] font-bold uppercase tracking-wider text-stone-400">Job ID</th>
+              <th class="py-3 text-[10px] font-bold uppercase tracking-wider text-stone-400">Client Client Registry</th>
+              <th class="py-3 text-[10px] font-bold uppercase tracking-wider text-stone-400">Status Status</th>
+              <th class="py-3 text-[10px] font-bold uppercase tracking-wider text-stone-400 text-right">Quoted Value</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-stone-100">
+            {% for job in pipeline_jobs %}
+            <tr class="hover:bg-stone-50/60 transition-colors group">
+              <td class="py-3.5 font-mono text-xs">
+                <a href="{% url 'production:jobcard_detail' job.pk %}" class="text-mahogany-600 hover:text-mahogany-700 font-semibold underline decoration-transparent group-hover:decoration-mahogany-600 transition-all">
+                  {{ job.job_id }}
+                </a>
+              </td>
+              <td class="py-3.5 text-xs font-medium text-charcoal-900">{{ job.client.name }}</td>
+              <td class="py-3.5">
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wider shadow-sm
+                  {% if job.status == 'in_production' %}bg-blue-50 text-blue-700 border border-blue-100
+                  {% elif job.status == 'completed' %}bg-forest-50 text-forest-700 border border-forest-100
+                  {% elif job.status == 'deposit_paid' %}bg-mahogany-50 text-mahogany-700 border border-mahogany-100
+                  {% else %}bg-stone-50 text-stone-600 border border-stone-200/60{% endif %}">
+                  {{ job.get_status_display }}
+                </span>
+              </td>
+              <td class="py-3.5 text-xs font-mono font-medium text-charcoal-900 text-right">KES {{ job.quoted_price|floatformat:0 }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="4" class="py-12 text-stone-400 text-xs font-light text-center">
+                No pipeline jobs currently flagged in active production. <br>
+                <a href="{% url 'ledger:quote_create' %}" class="text-mahogany-600 hover:underline font-normal mt-2 inline-block">Generate New Client Quote &rarr;</a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Sidebar Column: Statutory Compliance Balance Ledger -->
+  <div class="bg-white rounded-xl border border-stone-200/60 p-6 shadow-sm flex flex-col justify-between">
+    <div>
+      <div class="mb-6 pb-2 border-b border-stone-100">
+        <h3 class="font-serif text-lg text-charcoal-900 tracking-wide">{{ current_month }}</h3>
+        <p class="text-[10px] text-stone-400 uppercase tracking-wider font-semibold">Statutory & Capital Allocations</p>
+      </div>
+      
+      <div class="space-y-4">
+        <!-- Revenue Gross Metrics -->
+        <div class="flex justify-between items-center py-1.5">
+          <div>
+            <p class="text-xs font-medium text-charcoal-900">Gross Sales Volume</p>
+            <p class="text-[10px] text-stone-400 font-light">Total ledger receipts collected</p>
+          </div>
+          <p class="font-mono text-xs font-bold text-charcoal-900">KES {{ compliance.gross_sales|floatformat:0 }}</p>
+        </div>
+        
+        <!-- Turnover Tax Allocation Rule -->
+        <div class="flex justify-between items-center py-2 border-t border-stone-100">
+          <div>
+            <p class="text-xs font-medium text-stone-800">Turnover Tax (TOT)</p>
+            <p class="text-[10px] text-stone-400 font-light">1.5% statutory base sales remittance</p>
+          </div>
+          <p class="font-mono text-xs font-semibold text-rose-700">KES {{ compliance.tot|floatformat:0 }}</p>
+        </div>
+        
+        <!-- Affordable Housing Levy Allocation Rule -->
+        <div class="flex justify-between items-center py-2 border-t border-stone-100">
+          <div>
+            <p class="text-xs font-medium text-stone-800">Affordable Housing Levy (AHL)</p>
+            <p class="text-[10px] text-stone-400 font-light">1.5% structural statutory gross charge</p>
+          </div>
+          <p class="font-mono text-xs font-semibold text-rose-700">KES {{ compliance.ahl|floatformat:0 }}</p>
+        </div>
+        
+        <!-- Retirement Provisions Allocation Rule -->
+        <div class="flex justify-between items-center py-2 border-t border-stone-100">
+          <div>
+            <p class="text-xs font-medium text-stone-800">Retirement Reserve Provisions</p>
+            <p class="text-[10px] text-stone-400 font-light">10% allocation on internal gross yield</p>
+          </div>
+          <p class="font-mono text-xs font-semibold text-amber-700">KES {{ compliance.retirement_savings|floatformat:0 }}</p>
+        </div>
+        
+        <!-- Sacco Capital Allocation Rule -->
+        <div class="flex justify-between items-center py-2 border-t border-stone-100">
+          <div>
+            <p class="text-xs font-medium text-stone-800">SACCO Capital Reinvestment</p>
+            <p class="text-[10px] text-stone-400 font-light">10% strategic commercial deposit</p>
+          </div>
+          <p class="font-mono text-xs font-semibold text-amber-700">KES {{ compliance.sacco_savings|floatformat:0 }}</p>
+        </div>
+        
+        <!-- Summary Aggregations Framework -->
+        <div class="flex justify-between items-center pt-4 border-t border-stone-200">
+          <p class="text-xs font-bold text-charcoal-900 uppercase tracking-wider">Total Compliance Reserve</p>
+          <p class="font-serif text-lg font-bold text-mahogany-600">KES {{ compliance.total_obligations|floatformat:0 }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation Trigger Action Interfaces -->
+    <div class="mt-8">
+      <a href="{% url 'ledger:compliance_dashboard' %}" class="w-full inline-flex items-center justify-center border border-stone-300 bg-white text-stone-700 hover:bg-stone-50 hover:text-stone-900 px-4 py-3 rounded-lg text-xs uppercase tracking-widest font-semibold transition-colors text-center shadow-sm">
+        Review Full Compliance Audit Matrix
+      </a>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

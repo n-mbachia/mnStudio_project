@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Compliance {{ data.month_label }}{% endblock %}
+{% block page_title %}{{ data.month_label }} Compliance{% endblock %}
+{% block content %}
+<div class="max-w-lg card">
+  <dl class="space-y-4 text-sm">
+    {% for key, label in "gross_sales:Gross Sales,cogs:COGS,gross_profit:Gross Profit,tot:TOT (1.5% × sales),ahl:AHL (1.5% × sales),retirement_savings:Retirement (10% × profit),sacco_savings:SACCO (10% × profit),total_obligations:TOTAL SET ASIDE"|split:"," %}{% endfor %}
+    <div class="flex justify-between border-b border-stone-100 pb-2">
+      <dt class="text-stone-500">Gross Sales</dt><dd class="font-semibold">KES {{ data.gross_sales }}</dd>
+    </div>
+    <div class="flex justify-between border-b border-stone-100 pb-2">
+      <dt class="text-stone-500">COGS</dt><dd>KES {{ data.cogs }}</dd>
+    </div>
+    <div class="flex justify-between border-b border-stone-100 pb-2">
+      <dt class="text-stone-500">Gross Profit</dt><dd class="text-forest-700 font-semibold">KES {{ data.gross_profit }}</dd>
+    </div>
+    <div class="flex justify-between border-b border-stone-100 pb-2">
+      <dt class="text-stone-500">TOT (1.5% × gross sales)</dt><dd class="text-red-600">KES {{ data.tot }}</dd>
+    </div>
+    <div class="flex justify-between border-b border-stone-100 pb-2">
+      <dt class="text-stone-500">AHL (1.5% × gross sales)</dt><dd class="text-red-600">KES {{ data.ahl }}</dd>
+    </div>
+    <div class="flex justify-between border-b border-stone-100 pb-2">
+      <dt class="text-stone-500">Retirement (10% × gross profit)</dt><dd class="text-amber-600">KES {{ data.retirement_savings }}</dd>
+    </div>
+    <div class="flex justify-between border-b border-stone-100 pb-2">
+      <dt class="text-stone-500">SACCO (10% × gross profit)</dt><dd class="text-amber-600">KES {{ data.sacco_savings }}</dd>
+    </div>
+    <div class="flex justify-between pt-2">
+      <dt class="font-bold text-charcoal-900">Total Obligations</dt>
+      <dd class="font-serif text-2xl text-mahogany-700">KES {{ data.total_obligations }}</dd>
+    </div>
+  </dl>
+</div>
+{% endblock %}

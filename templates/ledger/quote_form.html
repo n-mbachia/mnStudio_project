@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}New Quote{% endblock %}
+{% block page_title %}New Quote{% endblock %}
+{% block content %}
+<div class="max-w-3xl">
+  <form method="post" class="space-y-6">
+    {% csrf_token %}
+    <div class="card">
+      <h3 class="font-serif text-xl mb-4">Quote Details</h3>
+      <div class="grid grid-cols-2 gap-4">
+        <div class="col-span-2"><label class="label">Client</label>{{ form.client }}</div>
+        <div><label class="label">Discount (KES)</label>{{ form.discount }}</div>
+        <div><label class="label">Deposit Amount (KES)</label>{{ form.deposit_amount }}</div>
+        <div><label class="label">Valid Until</label>{{ form.valid_until }}</div>
+        <div class="col-span-2"><label class="label">Notes</label>{{ form.notes }}</div>
+      </div>
+    </div>
+    <div class="card">
+      <h3 class="font-serif text-xl mb-4">Line Items</h3>
+      {{ formset.management_form }}
+      <table class="w-full">
+        <thead><tr><th class="table-header">Description</th><th class="table-header">Qty</th><th class="table-header">Unit Price</th><th class="table-header"></th></tr></thead>
+        <tbody id="formset-body">
+        {% for form in formset %}
+        <tr class="border-t border-stone-50">
+          <td class="table-cell">{{ form.description }}</td>
+          <td class="table-cell w-20">{{ form.quantity }}</td>
+          <td class="table-cell w-32">{{ form.unit_price }}</td>
+          <td class="table-cell w-8">{{ form.DELETE }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="flex gap-3">
+      <button type="submit" class="btn-primary">Create Quote</button>
+      <a href="{% url 'ledger:quote_list' %}" class="btn-secondary">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

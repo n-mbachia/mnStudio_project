@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Pipeline{% endblock %}
+{% block page_title %}Sales Pipeline{% endblock %}
+{% block header_actions %}
+<a href="{% url 'crm:lead_create' %}" class="btn-primary">+ New Lead</a>
+{% endblock %}
+{% block content %}
+<div class="flex gap-4 overflow-x-auto pb-4" style="min-height: 60vh;">
+  {% for stage in stages %}
+  <div class="shrink-0 w-72">
+    <div class="flex items-center justify-between mb-3">
+      <h3 class="text-sm font-semibold text-charcoal-700 uppercase tracking-wider">{{ stage.label }}</h3>
+      <span class="badge bg-stone-100 text-stone-600">{{ stage.leads|length }}</span>
+    </div>
+    <div class="space-y-3">
+      {% for lead in stage.leads %}
+      <div class="bg-white rounded-xl border border-stone-100 shadow-sm p-4 hover:shadow-md transition-shadow">
+        <p class="font-medium text-charcoal-900 text-sm">{{ lead.client.name }}</p>
+        <p class="text-xs text-stone-400 mt-0.5">{{ lead.piece_type }}</p>
+        {% if lead.notes %}
+        <p class="text-xs text-stone-500 mt-2 border-t border-stone-50 pt-2">{{ lead.notes|truncatechars:80 }}</p>
+        {% endif %}
+        <div class="flex items-center justify-between mt-3">
+          <a href="{% url 'crm:client_detail' lead.client.pk %}" class="text-xs text-mahogany-600 hover:underline">View Client →</a>
+          <span class="text-xs text-stone-300">{{ lead.created_at|date:"d M" }}</span>
+        </div>
+      </div>
+      {% empty %}
+      <div class="border-2 border-dashed border-stone-200 rounded-xl p-6 text-center text-xs text-stone-300">Empty</div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

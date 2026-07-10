@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}{{ client.name }}{% endblock %}
+{% block page_title %}{{ client.name }}{% endblock %}
+{% block breadcrumb %}<p class="text-xs text-stone-400 mt-0.5">Client Profile</p>{% endblock %}
+{% block header_actions %}
+<a href="{% url 'crm:client_update' client.pk %}" class="btn-secondary">Edit</a>
+<a href="{% url 'ledger:quote_create' %}?client={{ client.pk }}" class="btn-primary">+ New Quote</a>
+{% endblock %}
+{% block content %}
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+  <div class="space-y-6">
+    <div class="card">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-12 h-12 rounded-full bg-mahogany-100 flex items-center justify-center">
+          <span class="font-serif text-xl text-mahogany-700">{{ client.name|first }}</span>
+        </div>
+        <div>
+          <h3 class="font-semibold text-charcoal-900">{{ client.name }}</h3>
+          {% if client.is_vip %}<span class="badge bg-amber-100 text-amber-800">VIP</span>{% endif %}
+        </div>
+      </div>
+      <dl class="space-y-2 text-sm">
+        <div class="flex justify-between"><dt class="text-stone-400">Email</dt><dd class="font-medium">{{ client.email }}</dd></div>
+        <div class="flex justify-between"><dt class="text-stone-400">Phone</dt><dd class="font-medium">{{ client.phone }}</dd></div>
+        {% if client.county %}<div class="flex justify-between"><dt class="text-stone-400">County</dt><dd class="font-medium">{{ client.county }}</dd></div>{% endif %}
+        <div class="flex justify-between"><dt class="text-stone-400">Source</dt><dd>{{ client.get_acquisition_source_display }}</dd></div>
+        <div class="flex justify-between"><dt class="text-stone-400">Total Spent</dt><dd class="font-semibold text-forest-700">KES {{ client.total_spent|floatformat:0 }}</dd></div>
+      </dl>
+      {% if client.preference_notes %}
+      <div class="mt-4 pt-4 border-t border-stone-100">
+        <p class="text-xs text-stone-400 uppercase tracking-wider font-semibold mb-1">Preferences</p>
+        <p class="text-sm text-stone-600">{{ client.preference_notes }}</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="lg:col-span-2 space-y-6">
+    <!-- Jobs -->
+    <div class="card">
+      <h3 class="font-serif text-xl text-charcoal-900 mb-4">Commission History</h3>
+      <table class="w-full">
+        <thead><tr>
+          <th class="table-header">Job ID</th><th class="table-header">Status</th>
+          <th class="table-header">Quoted</th><th class="table-header">Margin</th>
+        </tr></thead>
+        <tbody>
+          {% for job in jobs %}
+          <tr class="hover:bg-stone-50">
+            <td class="table-cell font-mono text-xs text-mahogany-700">
+              <a href="{% url 'production:jobcard_detail' job.pk %}">{{ job.job_id }}</a>
+            </td>
+            <td class="table-cell"><span class="badge bg-stone-100 text-stone-600">{{ job.get_status_display }}</span></td>
+            <td class="table-cell">KES {{ job.quoted_price|floatformat:0 }}</td>
+            <td class="table-cell {% if job.actual_margin_pct >= 40 %}text-forest-700{% else %}text-red-600{% endif %}">{{ job.actual_margin_pct }}%</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4" class="table-cell text-center text-stone-400 py-6">No jobs yet</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Log Interaction -->
+    <div class="card">
+      <h3 class="font-serif text-xl text-charcoal-900 mb-4">Log Interaction</h3>
+      <form method="post" action="{% url 'crm:interaction_create' %}" class="space-y-3">
+        {% csrf_token %}
+        <input type="hidden" name="client" value="{{ client.pk }}">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="label">Channel</label>
+            {{ interaction_form.channel }}
+          </div>
+          <div>
+            <label class="label">Job (optional)</label>
+            {{ interaction_form.job }}
+          </div>
+        </div>
+        <div>
+          <label class="label">Note</label>
+          <textarea name="note" rows="2" class="input" placeholder="Summary of the interaction…"></textarea>
+        </div>
+        <button type="submit" class="btn-primary">Log Interaction</button>
+      </form>
+      <!-- Recent interactions -->
+      <div class="mt-6 space-y-3">
+        {% for interaction in interactions %}
+        <div class="flex gap-3">
+          <div class="w-2 h-2 rounded-full bg-mahogany-300 mt-2 shrink-0"></div>
+          <div>
+            <p class="text-xs text-stone-400">{{ interaction.created_at|date:"d M Y, H:i" }} via {{ interaction.get_channel_display }}</p>
+            <p class="text-sm text-charcoal-700 mt-0.5">{{ interaction.note }}</p>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

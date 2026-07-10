@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Job Cards{% endblock %}
+{% block page_title %}Active Job Cards{% endblock %}
+{% block content %}
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+  {% for card in job_cards %}
+  <a href="{% url 'production:jobcard_detail' card.job.pk %}" class="card hover:shadow-md transition-shadow group block">
+    <div class="flex items-start justify-between mb-3">
+      <div>
+        <p class="font-mono text-xs text-stone-400">{{ card.job.job_id }}</p>
+        <h3 class="font-serif text-lg text-charcoal-900 mt-0.5 group-hover:text-mahogany-700">{{ card.job.client.name }}</h3>
+      </div>
+      <span class="text-lg">{% if card.is_locked %}🔒{% else %}🔓{% endif %}</span>
+    </div>
+    <p class="text-sm text-stone-500 mb-4">{{ card.job.description|truncatechars:80 }}</p>
+    <div class="grid grid-cols-2 gap-3 text-xs">
+      <div class="bg-stone-50 rounded-lg p-2">
+        <p class="text-stone-400 mb-0.5">Quoted</p>
+        <p class="font-semibold text-charcoal-800">KES {{ card.job.quoted_price|floatformat:0 }}</p>
+      </div>
+      <div class="bg-stone-50 rounded-lg p-2">
+        <p class="text-stone-400 mb-0.5">Actual COGS</p>
+        <p class="font-semibold {% if card.job.actual_cogs > card.job.estimated_cogs %}text-red-600{% else %}text-forest-700{% endif %}">KES {{ card.job.actual_cogs|floatformat:0 }}</p>
+      </div>
+    </div>
+    {% if card.target_completion %}
+    <p class="text-xs text-stone-400 mt-3">Target: {{ card.target_completion|date:"d M Y" }}</p>
+    {% endif %}
+  </a>
+  {% empty %}
+  <div class="col-span-3 text-center text-stone-400 py-24">
+    <p class="font-serif text-2xl mb-2">No active jobs in production</p>
+    <p class="text-sm">Approve a quote to generate a job card.</p>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

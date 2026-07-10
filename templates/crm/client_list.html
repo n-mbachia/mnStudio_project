@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Clients{% endblock %}
+{% block page_title %}Clients{% endblock %}
+{% block header_actions %}
+<a href="{% url 'crm:client_create' %}" class="btn-primary">+ New Client</a>
+{% endblock %}
+{% block content %}
+<div class="card">
+  <form method="get" class="flex gap-3 mb-6">
+    <input name="q" value="{{ query }}" placeholder="Search by name or email…" class="input max-w-sm">
+    <button type="submit" class="btn-secondary">Search</button>
+    {% if query %}<a href="{% url 'crm:client_list' %}" class="btn-ghost">Clear</a>{% endif %}
+  </form>
+  <table class="w-full">
+    <thead><tr>
+      <th class="table-header">Name</th>
+      <th class="table-header">Phone</th>
+      <th class="table-header">Source</th>
+      <th class="table-header">Jobs</th>
+      <th class="table-header">VIP</th>
+      <th class="table-header">Joined</th>
+    </tr></thead>
+    <tbody>
+      {% for client in clients %}
+      <tr class="hover:bg-stone-50 cursor-pointer" onclick="window.location='{% url 'crm:client_detail' client.pk %}'">
+        <td class="table-cell font-medium text-mahogany-700">{{ client.name }}</td>
+        <td class="table-cell">{{ client.phone }}</td>
+        <td class="table-cell capitalize">{{ client.get_acquisition_source_display }}</td>
+        <td class="table-cell">{{ client.job_count }}</td>
+        <td class="table-cell">{% if client.is_vip %}<span class="badge bg-amber-100 text-amber-800">VIP</span>{% endif %}</td>
+        <td class="table-cell text-stone-400">{{ client.created_at|date:"d M Y" }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="6" class="table-cell text-center text-stone-400 py-12">No clients yet. <a href="{% url 'crm:client_create' %}" class="text-mahogany-600 hover:underline">Add the first client</a></td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

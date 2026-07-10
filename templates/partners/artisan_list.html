@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Artisans{% endblock %}
+{% block page_title %}Artisan Registry{% endblock %}
+{% block header_actions %}<a href="{% url 'partners:artisan_create' %}" class="btn-primary">+ Add Artisan</a>{% endblock %}
+{% block content %}
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+{% for a in artisans %}
+<a href="{% url 'partners:artisan_detail' a.pk %}" class="card hover:shadow-md transition-shadow">
+  <div class="flex items-center gap-3 mb-3">
+    <div class="w-10 h-10 rounded-full bg-forest-100 flex items-center justify-center"><span class="font-serif text-forest-700">{{ a.name|first }}</span></div>
+    <div><p class="font-semibold text-charcoal-900">{{ a.name }}</p><p class="text-xs text-stone-400">{{ a.get_specialty_display }}</p></div>
+  </div>
+  <div class="flex justify-between text-sm">
+    <span class="text-stone-400">Base Rate</span><span class="font-semibold">KES {{ a.base_piece_rate }}</span>
+  </div>
+</a>
+{% empty %}
+<div class="col-span-3 text-center text-stone-400 py-12">No artisans registered.</div>
+{% endfor %}
+</div>
+{% endblock %}

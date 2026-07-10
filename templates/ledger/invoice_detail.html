@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}{{ invoice.invoice_id }}{% endblock %}
+{% block page_title %}{{ invoice.invoice_id }}{% endblock %}
+{% block breadcrumb %}<p class="text-xs text-stone-400 mt-0.5">{{ invoice.client.name }} — {{ invoice.get_status_display }}</p>{% endblock %}
+{% block header_actions %}
+<a href="{% url 'ledger:invoice_print' invoice.pk %}" target="_blank" class="btn-secondary">🖨 Print Invoice</a>
+{% endblock %}
+{% block content %}
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+  <div class="lg:col-span-2 card">
+    <h3 class="font-serif text-xl mb-4">Line Items</h3>
+    <table class="w-full">
+      <thead><tr><th class="table-header">Description</th><th class="table-header">Qty</th><th class="table-header">Unit Price</th><th class="table-header">Total</th></tr></thead>
+      <tbody>
+      {% for li in line_items %}
+      <tr><td class="table-cell">{{ li.description }}</td><td class="table-cell">{{ li.quantity }}</td>
+      <td class="table-cell">KES {{ li.unit_price }}</td><td class="table-cell font-semibold">KES {{ li.total }}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    <div class="text-right mt-4 pt-4 border-t border-stone-100 space-y-1">
+      <p class="font-serif text-2xl text-charcoal-900">Total: KES {{ invoice.total }}</p>
+      <p class="text-sm text-stone-500">Paid: KES {{ invoice.amount_paid }}</p>
+      <p class="text-lg font-semibold {% if balance_due > 0 %}text-red-600{% else %}text-forest-700{% endif %}">Balance Due: KES {{ balance_due }}</p>
+    </div>
+  </div>
+  <div class="space-y-6">
+    <div class="card">
+      <h3 class="font-serif text-xl mb-4">Record Payment</h3>
+      <form method="post" action="{% url 'ledger:payment_add' invoice.pk %}" class="space-y-3">
+        {% csrf_token %}
+        <div><label class="label">Amount (KES)</label>{{ payment_form.amount }}</div>
+        <div><label class="label">Method</label>{{ payment_form.method }}</div>
+        <div><label class="label">M-Pesa Ref</label>{{ payment_form.mpesa_ref }}</div>
+        <div><label class="label">Payment Date</label>{{ payment_form.paid_at }}</div>
+        <button type="submit" class="btn-primary w-full justify-center">Record Payment</button>
+      </form>
+    </div>
+    <div class="card">
+      <h3 class="font-serif text-xl mb-3">Payment History</h3>
+      <div class="space-y-2">
+        {% for p in payments %}
+        <div class="flex justify-between items-center text-sm py-2 border-b border-stone-50">
+          <div>
+            <p class="font-medium">KES {{ p.amount }}</p>
+            <p class="text-xs text-stone-400">{{ p.get_method_display }} — {{ p.paid_at|date:"d M Y" }}</p>
+            {% if p.mpesa_ref %}<p class="text-xs text-stone-400 font-mono">{{ p.mpesa_ref }}</p>{% endif %}
+          </div>
+          <span class="badge {% if p.status == 'confirmed' %}bg-forest-100 text-forest-800{% else %}bg-amber-100 text-amber-800{% endif %}">{{ p.get_status_display }}</span>
+        </div>
+        {% empty %}
+        <p class="text-sm text-stone-400 text-center py-4">No payments recorded</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
