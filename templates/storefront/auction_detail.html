@@ -2,241 +2,282 @@
 
 {% extends "base.html" %}
 {% block title %}{{ lot.title }} — Live Auction — MN Studio{% endblock %}
-{% block public_content %}
 
-<div class="min-h-screen bg-charcoal-900 text-stone-100 py-16 px-6 sm:px-8 relative overflow-hidden" x-data="{ currentTab: 'aesthetic' }">
-  <div class="max-w-5xl mx-auto relative z-10">
-    <!-- Back to Auctions Navigation -->
-    <a href="{% url 'storefront:auction_list' %}" class="inline-flex items-center gap-1.5 text-stone-400 text-xs font-medium uppercase tracking-wider hover:text-white transition-colors group">
-      <span class="transform group-hover:-translate-x-1 transition-transform">&larr;</span> Back to Live Auctions
+{% block public_content %}
+<div class="min-h-screen bg-charcoal-950 text-stone-100 pt-24 pb-16 px-4 sm:px-6 lg:px-8" x-data="{ currentTab: 'aesthetic' }">
+  <div class="max-w-6xl mx-auto">
+    <!-- Back Navigation Stage -->
+    <a href="{% url 'storefront:auction_list' %}" class="inline-flex items-center gap-2 text-charcoal-400 text-sm hover:text-white transition-colors group mb-8 reveal">
+      <i data-lucide="arrow-left" class="w-4 h-4 transition-transform group-hover:-translate-x-1"></i>
+      Back to Live Auctions
     </a>
 
-    <!-- Restructured Layout Grid -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 mt-8">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12">
       
-      <!-- Left Column: Media Container & Layout Switcher (5 Columns Wide) -->
-      <div class="lg:col-span-5">
-        <div class="sticky top-8 space-y-4">
+      <!-- Left Anchor Matrix Layout: Media Viewport Systems -->
+      <div class="lg:col-span-5 reveal">
+        <div class="sticky top-24 space-y-4">
           
-          <!-- Tab Toggles for Blueprint Integration -->
+          <!-- Architecture Spec Switcher Controls -->
           {% if has_architectural_specs %}
-          <div class="flex bg-charcoal-950/60 p-1 rounded-xl border border-white/5 space-x-1">
+          <div class="flex bg-charcoal-900/60 p-1 rounded-xl border border-white/5 space-x-1">
             <button @click="currentTab = 'aesthetic'" 
-                    :class="currentTab === 'aesthetic' ? 'bg-white/10 text-white border-white/10' : 'text-stone-400 hover:text-white border-transparent'"
-                    class="flex-1 text-center py-2 text-[11px] font-bold uppercase tracking-wider rounded-lg border transition-all">
-              📸 Aesthetic View
+                    :class="currentTab === 'aesthetic' ? 'bg-white/10 text-white border-white/10' : 'text-charcoal-400 hover:text-white border-transparent'"
+                    class="flex-1 text-center py-2.5 text-[11px] font-bold uppercase tracking-wider rounded-lg border transition-all flex items-center justify-center gap-2"
+                    aria-controls="aesthetic-panel" :aria-selected="currentTab === 'aesthetic'">
+              <i data-lucide="image" class="w-3.5 h-3.5"></i>
+              Aesthetic
             </button>
             <button @click="currentTab = 'blueprint'" 
-                    :class="currentTab === 'blueprint' ? 'bg-white/10 text-white border-white/10' : 'text-stone-400 hover:text-white border-transparent'"
-                    class="flex-1 text-center py-2 text-[11px] font-bold uppercase tracking-wider rounded-lg border transition-all">
-              📐 Spatial Blueprint
+                    :class="currentTab === 'blueprint' ? 'bg-white/10 text-white border-white/10' : 'text-charcoal-400 hover:text-white border-transparent'"
+                    class="flex-1 text-center py-2.5 text-[11px] font-bold uppercase tracking-wider rounded-lg border transition-all flex items-center justify-center gap-2"
+                    aria-controls="blueprint-panel" :aria-selected="currentTab === 'blueprint'">
+              <i data-lucide="ruler" class="w-3.5 h-3.5"></i>
+              Blueprint
             </button>
           </div>
           {% endif %}
 
-          <!-- Viewport Box -->
-          <div class="block relative aspect-[4/5] rounded-2xl overflow-hidden border border-white/10 bg-charcoal-950 shadow-2xl">
+          <!-- Main Interactive Content Viewport Container -->
+          <div class="relative aspect-[4/5] rounded-2xl overflow-hidden border border-white/10 bg-charcoal-900 shadow-2xl">
             
-            <!-- Aesthetic Tab View -->
-            <div x-show="currentTab === 'aesthetic'" class="absolute inset-0 w-full h-full">
-              {% if lot.image_url %}
-                <img src="{{ lot.image_url }}" alt="{{ lot.title }}" class="absolute inset-0 w-full h-full object-cover object-center opacity-75">
-              {% elif lot.product and lot.product.media.first %}
-                {% with lot.product.media.first as initial_media %}
-                  {% if initial_media.media_type == 'VIDEO' %}
-                    <video src="{{ initial_media.media_url }}" class="absolute inset-0 w-full h-full object-cover object-center opacity-75" autoplay muted loop playsinline></video>
-                  {% else %}
-                    <img src="{{ initial_media.media_url }}" alt="{{ lot.title }}" class="absolute inset-0 w-full h-full object-cover object-center opacity-75">
-                  {% endif %}
-                {% endwith %}
+            <!-- Aesthetic High-Fidelity Rendering Layer Panel -->
+            <div id="aesthetic-panel" x-show="currentTab === 'aesthetic'" class="absolute inset-0 w-full h-full" 
+                 x-transition:enter="transition ease-out duration-300 transform" x-transition:enter-start="opacity-0 scale-98" x-transition:enter-end="opacity-100 scale-100">
+              {% with lot.display_media as media %}
+              {% if media %}
+                {% if media.media_type == 'VIDEO' %}
+                  <video src="{{ media.media_url }}" class="absolute inset-0 w-full h-full object-cover object-center opacity-75" autoplay muted loop playsinline></video>
+                {% else %}
+                  <img src="{{ media.media_url }}" alt="{{ lot.title }}" class="absolute inset-0 w-full h-full object-cover object-center opacity-75">
+                {% endif %}
               {% else %}
-                <div class="absolute inset-0 w-full h-full bg-charcoal-950 flex items-center justify-center p-8">
-                  <img src="https://res.cloudinary.com/famfef4z/image/upload/v1783431102/mnStudio_ijiqh7.png" alt="MN Studio" class="w-auto max-h-16 object-contain opacity-20">
+                <div class="absolute inset-0 flex items-center justify-center">
+                  <div class="text-center">
+                    <i data-lucide="image-off" class="w-12 h-12 text-charcoal-700 mx-auto mb-3"></i>
+                    <p class="text-charcoal-600 text-sm">No media available</p>
+                  </div>
                 </div>
               {% endif %}
-              <!-- Contrast Mask Overlay -->
-              <div class="absolute inset-0 bg-gradient-to-t from-charcoal-950 via-charcoal-950/20 to-transparent z-10 pointer-events-none"></div>
+              {% endwith %}
+              <div class="absolute inset-0 bg-gradient-to-t from-charcoal-950 via-charcoal-950/20 to-transparent pointer-events-none"></div>
             </div>
 
-            <!-- Architectural Blueprint Tab View -->
+            <!-- Architectural Blueprint Draft Layer Panel -->
             {% if has_architectural_specs %}
-            <div x-show="currentTab === 'blueprint'" class="absolute inset-0 w-full h-full bg-white flex flex-col justify-between p-6" x-cloak>
+            <div id="blueprint-panel" x-show="currentTab === 'blueprint'" x-cloak class="absolute inset-0 w-full h-full bg-white flex flex-col justify-between p-6" 
+                 x-transition:enter="transition ease-out duration-300 transform" x-transition:enter-start="opacity-0 scale-98" x-transition:enter-end="opacity-100 scale-100">
               {% if lot.display_blueprint_url %}
                 <img src="{{ lot.display_blueprint_url }}" alt="Architectural drawing for {{ lot.title }}" class="w-full h-5/6 object-contain mx-auto">
-                <p class="text-center text-[10px] uppercase font-mono tracking-wider text-stone-400 border-t pt-3">
-                  Scale reference profiles match structural specs listed below
+                <p class="text-center text-[10px] uppercase font-mono tracking-wider text-charcoal-400 border-t border-charcoal-100 pt-3">
+                  Scale reference profiles match structural specs
                 </p>
               {% else %}
                 <div class="my-auto text-center p-4">
-                  <span class="text-2xl block mb-2">📐</span>
-                  <p class="text-xs text-charcoal-900 font-mono uppercase tracking-wider">Blueprint Vector Pending</p>
-                  <p class="text-[11px] text-stone-500 mt-1">Exact dimensional values are logged in the specification chart.</p>
+                  <i data-lucide="ruler" class="w-10 h-10 text-charcoal-300 mx-auto mb-3"></i>
+                  <p class="text-xs text-charcoal-900 font-mono uppercase tracking-widest font-semibold">Blueprint Pending</p>
+                  <p class="text-sm text-charcoal-500 mt-1">Exact dimensions logged in specification chart.</p>
                 </div>
               {% endif %}
             </div>
             {% endif %}
-
           </div>
           
           {% if lot.product and lot.product.slug %}
-            <a href="{% url 'storefront:product_detail' lot.product.slug %}" class="inline-flex items-center gap-1.5 text-[10px] font-mono tracking-wide text-stone-500 uppercase hover:text-stone-300 transition-colors mx-auto w-full justify-center">
-              🔍 Inspect Comprehensive Design Registry &rarr;
+            <a href="{% url 'storefront:product_detail' lot.product.slug %}" class="inline-flex items-center gap-2 text-[11px] font-mono tracking-wide text-charcoal-500 uppercase hover:text-charcoal-300 transition-colors mx-auto w-full justify-center py-2">
+              <i data-lucide="external-link" class="w-3 h-3"></i>
+              View Full Design Registry
             </a>
           {% endif %}
           
         </div>
       </div>
 
-      <!-- Right Column Cluster: Console Actions & Ledger Logs (7 Columns Wide) -->
-	  <div class="lg:col-span-7 grid grid-cols-1 gap-8">
-	  
-	    <div class="space-y-6">
-		  <div>
-		    <div class="flex items-center justify-between gap-4 mb-6 border-b border-white/5 pb-4">
-		      <a href="{% url 'storefront:product_list' %}" class="inline-flex items-center gap-2 text-[12px] font-bold uppercase tracking-widest text-stone-400 hover:text-white transition-colors group">
-		        <span class="text-xs transform group-hover:-translate-x-0.5 transition-transform">&larr;</span> View our collection
-		      </a>
-		      <span class="text-[12px] font-mono tracking-widest text-stone-600 uppercase">MN Studio // Live Auction</span>
-		    </div>
+      <!-- Right Anchor Matrix Layout: Details, Parameters & Ledger Form -->
+      <div class="lg:col-span-7 space-y-8 reveal" style="animation-delay: 150ms">
+      
+        <div class="space-y-6">
+          <div>
+            <div class="flex items-center justify-between gap-4 mb-6 border-b border-white/5 pb-4">
+              <a href="{% url 'storefront:product_list' %}" class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-charcoal-400 hover:text-white transition-colors group">
+                <i data-lucide="grid-3x3" class="w-3.5 h-3.5 transition-transform group-hover:-translate-x-0.5"></i>
+                View Collection
+              </a>
+              <span class="text-xs font-mono tracking-widest text-charcoal-600 uppercase">MN Studio // Live Auction</span>
+            </div>
 
-		    <!-- Badges -->
-		    <div class="flex flex-wrap items-center gap-2 mb-4">
-		      <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-widest bg-mahogany-700 text-white shadow-sm shadow-mahogany-900/30">
-		        {{ lot.get_status_display }}
-		      </span>
-		      {% if lot.status == 'extended' %}
-		        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-widest bg-amber-500/20 text-amber-300 border border-amber-500/30 animate-pulse">
-		          ⚡ Overtime Extension
-		        </span>
-		      {% endif %}
-		    </div>
-		  
-		    <!-- Title & Description -->
-		    <h1 class="font-serif text-4xl text-white tracking-tight leading-tight mb-4">
-		      {{ lot.title }}
-		    </h1>
-		    <p class="text-stone-400 text-sm font-light leading-relaxed">
-		      {{ lot.description }}
-		    </p>
-		  </div>
+            <!-- Context Management Badges -->
+            <div class="flex flex-wrap items-center gap-2 mb-4">
+              <span class="inline-flex items-center px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-widest bg-mahogany-700 text-white shadow-sm">
+                {{ lot.get_status_display }}
+              </span>
+              {% if lot.status == 'extended' %}
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] font-bold uppercase tracking-widest bg-amber-500/20 text-amber-300 border border-amber-500/30 animate-pulse">
+                  <i data-lucide="zap" class="w-3 h-3"></i>
+                  Overtime Extension
+                </span>
+              {% endif %}
+            </div>
+          
+            <h1 class="font-serif text-3xl sm:text-4xl text-white tracking-tight leading-tight mb-4">
+              {{ lot.title }}
+            </h1>
+            <p class="text-charcoal-400 text-sm font-light leading-relaxed">
+              {{ lot.description }}
+            </p>
+          </div>
 
-          <!-- Dynamic Architectural Sizing Block -->
+          <!-- Dimension Parameters Configuration Matrix -->
           {% if lot.product.width_cm or lot.product.height_cm or lot.product.depth_cm %}
           <div class="border border-white/5 bg-white/[0.01] rounded-2xl p-4 grid grid-cols-3 gap-4 text-center font-mono">
-            <div class="p-2 bg-charcoal-950/40 rounded-xl border border-white/[0.02]">
-              <span class="block text-[10px] text-stone-500 uppercase tracking-wider mb-0.5">Width</span>
+            <div class="p-3 bg-charcoal-900/40 rounded-xl border border-white/[0.02]">
+              <span class="block text-[10px] text-charcoal-500 uppercase tracking-wider mb-1">Width</span>
               <span class="text-sm font-semibold text-stone-200">{{ lot.product.width_cm|default:"--" }} cm</span>
             </div>
-            <div class="p-2 bg-charcoal-950/40 rounded-xl border border-white/[0.02]">
-              <span class="block text-[10px] text-stone-500 uppercase tracking-wider mb-0.5">Depth</span>
+            <div class="p-3 bg-charcoal-900/40 rounded-xl border border-white/[0.02]">
+              <span class="block text-[10px] text-charcoal-500 uppercase tracking-wider mb-1">Depth</span>
               <span class="text-sm font-semibold text-stone-200">{{ lot.product.depth_cm|default:"--" }} cm</span>
             </div>
-            <div class="p-2 bg-charcoal-950/40 rounded-xl border border-white/[0.02]">
-              <span class="block text-[10px] text-stone-500 uppercase tracking-wider mb-0.5">Height</span>
+            <div class="p-3 bg-charcoal-900/40 rounded-xl border border-white/[0.02]">
+              <span class="block text-[10px] text-charcoal-500 uppercase tracking-wider mb-1">Height</span>
               <span class="text-sm font-semibold text-stone-200">{{ lot.product.height_cm|default:"--" }} cm</span>
             </div>
           </div>
           {% endif %}
 
-          <!-- Financial Summary Display -->
+          <!-- Live Financial Summary Metrics Panel -->
           <div class="bg-gradient-to-br from-white/[0.04] to-white/[0.01] border border-white/10 rounded-2xl p-6 backdrop-blur-sm shadow-xl">
-            <span class="text-[10px] font-bold uppercase tracking-widest text-stone-400 block mb-1">Current Highest Investment</span>
+            <span class="text-[10px] font-bold uppercase tracking-widest text-charcoal-400 block mb-1">Current Highest Bid</span>
             <div class="flex items-baseline gap-2">
-              <span class="font-serif text-5xl font-medium text-white tracking-tight">KES {{ lot.current_bid|floatformat:0 }}</span>
+              <span class="font-serif text-4xl sm:text-5xl font-medium text-white tracking-tight">KES {{ lot.current_bid|floatformat:0 }}</span>
             </div>
             
-            <div class="mt-4 pt-4 border-t border-white/5 flex flex-wrap items-center justify-between text-xs text-stone-400 gap-4">
-              <div class="flex items-center gap-1.5">
-                <span class="w-1.5 h-1.5 rounded-full bg-mahogany-500"></span>
-                <span>{{ lot.bid_count }} formal verified bids</span>
+            <div class="mt-4 pt-4 border-t border-white/5 flex flex-wrap items-center justify-between text-xs text-charcoal-400 gap-4">
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-mahogany-500"></span>
+                <span>{{ lot.bid_count }} verified bids</span>
               </div>
-              <div>
+              <div class="flex items-center gap-2">
+                <i data-lucide="clock" class="w-3.5 h-3.5 text-mahogany-400"></i>
                 <span>Closes: <strong class="text-stone-200 font-medium">{{ lot.end_time|date:"d M Y, H:i" }} EAT</strong></span>
               </div>
             </div>
           </div>
 
-          <!-- Bidding Interface Form -->
+          <!-- Cryptographic Transaction Ledger Submission Area -->
           {% if lot.is_live %}
           <div class="bg-white/[0.02] border border-white/5 rounded-2xl p-6">
-            <h3 class="text-xs font-bold uppercase tracking-widest text-mahogany-400 mb-4">Submit Dynamic Auction Bid</h3>
+            <h3 class="text-xs font-bold uppercase tracking-widest text-mahogany-400 mb-5 flex items-center gap-2">
+              <i data-lucide="gavel" class="w-4 h-4"></i>
+              Submit Your Bid
+            </h3>
             
-            <form method="post" action="{% url 'storefront:place_bid' lot.pk %}" class="space-y-4">
+            <form method="post" action="{% url 'storefront:place_bid' lot.pk %}" class="space-y-4" x-data="{ amount: '', minBid: {{ lot.current_bid|default:lot.starting_bid }} + 1 }">
               {% csrf_token %}
               
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label class="block text-[11px] uppercase tracking-wider text-stone-400 mb-1.5" for="id_name">Your Name</label>
-                  <input id="id_name" name="name" placeholder="e.g., Malik Ndwiga" required class="w-full bg-charcoal-950 border border-white/10 text-white placeholder-stone-600 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-mahogany-500/50 transition-colors">
+                  <label class="block text-[11px] uppercase tracking-wider text-charcoal-400 mb-1.5 font-medium" for="id_name">Full Name</label>
+                  <input id="id_name" name="name" required placeholder="e.g., Malik Ndwiga"
+                         class="w-full bg-charcoal-900 border border-white/10 text-white placeholder-charcoal-600 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-mahogany-500/50 focus:ring-2 focus:ring-mahogany-500/10 transition-all">
                 </div>
                 <div>
-                    <label class="block text-[11px] uppercase tracking-wider text-stone-400 mb-1.5" for="id_phone">Phone Number</label>
-                    <input id="id_phone" name="phone" type="tel" placeholder="e.g., 0712345678" required class="w-full bg-charcoal-950 border border-white/10 text-white placeholder-stone-600 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-mahogany-500/50 transition-colors">
+                  <label class="block text-[11px] uppercase tracking-wider text-charcoal-400 mb-1.5 font-medium" for="id_phone">Phone Number</label>
+                  <input id="id_phone" name="phone" type="tel" required placeholder="0712345678"
+                         class="w-full bg-charcoal-900 border border-white/10 text-white placeholder-charcoal-600 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-mahogany-500/50 focus:ring-2 focus:ring-mahogany-500/10 transition-all">
                 </div>
                 <div class="sm:col-span-2">
-                  <label class="block text-[11px] uppercase tracking-wider text-stone-400 mb-1.5" for="id_email">Email Address</label>
-                  <input id="id_email" name="email" type="email" placeholder="name@domain.com" required class="w-full bg-charcoal-950 border border-white/10 text-white placeholder-stone-600 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-mahogany-500/50 transition-colors">
+                  <label class="block text-[11px] uppercase tracking-wider text-charcoal-400 mb-1.5 font-medium" for="id_email">Email Address</label>
+                  <input id="id_email" name="email" type="email" required placeholder="name@domain.com"
+                         class="w-full bg-charcoal-900 border border-white/10 text-white placeholder-charcoal-600 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-mahogany-500/50 focus:ring-2 focus:ring-mahogany-500/10 transition-all">
                 </div>
               </div>
               
               <div>
-                <label class="block text-[11px] uppercase tracking-wider text-stone-400 mb-1.5" for="id_amount">Bid Amount (KES)</label>
+                <label class="block text-[11px] uppercase tracking-wider text-charcoal-400 mb-1.5 font-medium" for="id_amount">Bid Amount (KES)</label>
                 <div class="relative">
-                  <span class="absolute left-4 top-1/2 -translate-y-1/2 text-stone-500 text-sm font-medium">KES</span>
-                  <input id="id_amount" name="amount" type="number" step="1" placeholder="Enter amount greater than current bid" required class="w-full bg-charcoal-950 border border-white/10 text-white placeholder-stone-600 rounded-lg pl-14 pr-4 py-3 text-sm font-medium focus:outline-none focus:border-mahogany-500/50 transition-colors">
+                  <span class="absolute left-4 top-1/2 -translate-y-1/2 text-charcoal-500 text-sm font-medium">KES</span>
+                  <input id="id_amount" name="amount" type="number" step="1" required 
+                         x-model="amount"
+                         :min="minBid"
+                         placeholder="Enter amount greater than current bid"
+                         class="w-full bg-charcoal-900 border border-white/10 text-white placeholder-charcoal-600 rounded-xl pl-14 pr-4 py-3 text-sm font-medium focus:outline-none focus:border-mahogany-500/50 focus:ring-2 focus:ring-mahogany-500/10 transition-all">
                 </div>
+                <p class="text-[11px] text-charcoal-500 mt-1.5" x-show="amount && parseFloat(amount) <= minBid" x-cloak>
+                  <i data-lucide="alert-triangle" class="w-3 h-3 inline mr-1"></i>
+                  Bid must exceed KES {{ lot.current_bid|floatformat:0 }}
+                </p>
               </div>
               
-              <button type="submit" class="w-full inline-flex items-center justify-center bg-mahogany-700 hover:bg-mahogany-600 text-white py-3.5 rounded-lg text-xs uppercase tracking-widest font-semibold shadow-md shadow-mahogany-950/50 transition-all group">
-                Authorize Custom Bid <span class="ml-2 transform group-hover:translate-x-1 transition-transform">&rarr;</span>
+              <button type="submit" 
+                      :disabled="!amount || parseFloat(amount) <= minBid"
+                      class="w-full inline-flex items-center justify-center gap-2 bg-mahogany-700 hover:bg-mahogany-600 disabled:bg-charcoal-700 disabled:text-charcoal-500 disabled:cursor-not-allowed text-white py-4 rounded-xl text-xs uppercase tracking-widest font-semibold shadow-md shadow-mahogany-950/50 transition-all group">
+                <i data-lucide="gavel" class="w-4 h-4"></i>
+                Place Bid
+                <i data-lucide="arrow-right" class="w-4 h-4 transition-transform group-hover:translate-x-1"></i>
               </button>
             </form>
           </div>
           {% else %}
-          <div class="bg-white/[0.02] border border-white/5 rounded-2xl p-6 text-center text-stone-500 text-sm font-light italic">
-            Bidding for this custom commission lot is currently closed.
+          <div class="bg-white/[0.02] border border-white/5 rounded-2xl p-8 text-center">
+            <div class="w-16 h-16 rounded-full bg-charcoal-900 flex items-center justify-center mx-auto mb-4">
+              <i data-lucide="lock" class="w-6 h-6 text-charcoal-500"></i>
+            </div>
+            <p class="text-charcoal-400 text-sm font-light">Bidding for this lot is currently closed.</p>
+            <a href="{% url 'storefront:waitlist' %}" class="inline-flex items-center gap-2 mt-4 text-mahogany-400 hover:text-mahogany-300 text-sm font-medium">
+              Join waitlist for similar pieces
+              <i data-lucide="arrow-right" class="w-4 h-4"></i>
+            </a>
           </div>
           {% endif %}
         </div>
 
-        <!-- Ledger History Element Block -->
-		<div>
-		  <div class="flex items-center justify-between border-b border-white/10 pb-3 mb-4">
-			<h3 class="text-xs font-bold uppercase tracking-widest text-stone-400">Verified Bid History</h3>
-			<span class="text-[10px] uppercase font-mono tracking-widest text-stone-500">Live Ledger</span>
-		  </div>
+        <!-- Historical Performance Verification Log Ledger -->
+        <div>
+          <div class="flex items-center justify-between border-b border-white/10 pb-3 mb-4">
+            <h3 class="text-xs font-bold uppercase tracking-widest text-charcoal-400 flex items-center gap-2">
+              <i data-lucide="history" class="w-4 h-4"></i>
+              Verified Bid History
+            </h3>
+            <span class="text-[10px] uppercase font-mono tracking-widest text-charcoal-600">Live Ledger</span>
+          </div>
 
-		  <div class="space-y-2.5 max-h-[350px] overflow-y-auto pr-2 custom-scrollbar">
-			{% for bid in bids %}
-			  <div class="flex justify-between items-center bg-white/[0.02] hover:bg-white/[0.04] border border-white/5 rounded-xl px-4 py-3.5 transition-colors">
-				<div class="space-y-0.5">
-				  <p class="text-sm font-medium text-stone-200 tracking-wide">
-				    {% if bid.bidder_name %}
-				      {{ bid.bidder_name }}
-				    {% elif bid.bidder.name %}
-				      {{ bid.bidder.name }}
-				    {% else %}
-				      {{ bid.bidder }}
-				    {% endif %}
-				  </p>
-				  <p class="text-[10px] text-stone-500 font-mono">{{ bid.created_at|date:"H:i:s" }} EAT</p>
-				</div>
-				<div class="text-right">
-				  <p class="font-serif text-base font-medium text-mahogany-300">KES {{ bid.amount|floatformat:0 }}</p>
-				</div>
-			  </div>
-			{% empty %}
-			  <div class="border border-dashed border-white/10 rounded-xl p-8 text-center">
-				<p class="text-stone-500 text-sm font-light italic">No bids recorded yet.</p>
-				<p class="text-[10px] text-stone-600 mt-1">Be the inaugural collector to initialize this catalog piece.</p>
-			  </div>
-			{% endfor %}
-		  </div>
-		</div>
+          <div class="space-y-2.5 max-h-[400px] overflow-y-auto pr-2 scrollbar-hide">
+            {% for bid in bids %}
+              <div class="flex justify-between items-center bg-white/[0.02] hover:bg-white/[0.04] border border-white/5 rounded-xl px-4 py-3.5 transition-colors">
+                <div class="space-y-0.5">
+                  <p class="text-sm font-medium text-stone-200 tracking-wide flex items-center gap-2">
+                    <i data-lucide="user" class="w-3.5 h-3.5 text-charcoal-500"></i>
+                    {% if bid.bidder %}
+                      {{ bid.bidder.name|default:bid.bidder }}
+                    {% else %}
+                      Anonymous
+                    {% endif %}
+                  </p>
+                  <p class="text-[10px] text-charcoal-500 font-mono flex items-center gap-1.5">
+                    <i data-lucide="clock" class="w-3 h-3"></i>
+                    {{ bid.placed_at|date:"H:i:s" }} EAT
+                  </p>
+                </div>
+                <div class="text-right">
+                  <p class="font-serif text-base font-medium text-mahogany-300">KES {{ bid.amount|floatformat:0 }}</p>
+                  {% if bid.is_proxy %}
+                    <span class="text-[9px] text-charcoal-500 uppercase tracking-wider">Auto-bid</span>
+                  {% endif %}
+                </div>
+              </div>
+            {% empty %}
+              <div class="border border-dashed border-white/10 rounded-xl p-8 text-center">
+                <i data-lucide="inbox" class="w-8 h-8 text-charcoal-600 mx-auto mb-3"></i>
+                <p class="text-charcoal-500 text-sm font-light">No bids recorded yet.</p>
+                <p class="text-[11px] text-charcoal-600 mt-1">Be the first to bid on this piece.</p>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
       </div>
 
     </div>
   </div>
 </div>
-
 {% endblock %}

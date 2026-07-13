@@ -6,7 +6,8 @@ from . import views
 app_name = "storefront"
 
 urlpatterns = [
-    path("", views.ProductListView.as_view(), name="product_list"),
+	path("", views.HomeView.as_view(), name="home"),
+    path("catalog/", views.ProductListView.as_view(), name="product_list"),
     path("products/<slug:slug>/", views.ProductDetailView.as_view(), name="product_detail"),
     path("auctions/", views.AuctionListView.as_view(), name="auction_list"),
     path("auctions/<int:pk>/", views.AuctionDetailView.as_view(), name="auction_detail"),

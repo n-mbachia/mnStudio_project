@@ -19,7 +19,7 @@
     </div>
 
     <!-- Typography -->
-    <h1 class="font-serif text-4xl sm:text-5xl text-stone-400 tracking-tight mb-4 animate-fade-in-up animate-delay-100">
+    <h1 class="font-serif text-4xl sm:text-5xl text-white tracking-tight mb-4 animate-fade-in-up animate-delay-100">
       Your request is <span class="italic font-normal text-mahogany-400">registered</span>.
     </h1>
     

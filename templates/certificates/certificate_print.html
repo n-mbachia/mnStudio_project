@@ -1,51 +1,89 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8"><title>CoA — {{ cert.piece_name }}</title>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
-  <style>
-    body { font-family: 'Jost', sans-serif; max-width: 680px; margin: 0 auto; padding: 40px; }
-    .serif { font-family: 'Cormorant Garamond', serif; }
-    .border-deco { border: 3px solid #963d1b; padding: 40px; }
-    @media print { .no-print { display: none !important; } }
-  </style>
-</head>
-<body>
-<div class="no-print" style="background:#1a1a1a;color:white;padding:10px 16px;border-radius:6px;margin-bottom:20px;display:flex;justify-content:space-between">
-  <span>Certificate of Authenticity</span>
-  <button onclick="window.print()" style="background:#963d1b;color:white;border:none;padding:6px 16px;border-radius:4px;cursor:pointer">Print / Save PDF</button>
+{% extends "base.html" %}
+{% block title %}Print Certificate — {{ cert.piece_name }}{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 py-4">
+  <!-- Print Toolbar -->
+  <div class="bg-charcoal-900 text-white p-4 rounded-lg mb-6 flex items-center justify-between print:hidden">
+    <span class="text-sm font-semibold">Certificate of Authenticity</span>
+    <button onclick="window.print()" class="bg-mahogany-600 hover:bg-mahogany-700 text-white font-medium px-4 py-2 rounded-lg text-sm transition-colors">
+      🖨️ Print / Save as PDF
+    </button>
+  </div>
+
+  <!-- Printable Certificate -->
+  <div class="bg-white border-2 border-mahogany-700 rounded-xl overflow-hidden shadow-2xl print:shadow-none print:border-0">
+    
+    <!-- Header -->
+    <div class="bg-charcoal-900 text-white p-8 sm:p-12 text-center border-b-2 border-mahogany-700">
+      <p class="text-xs uppercase tracking-widest text-stone-400 mb-2">Certificate of Authenticity</p>
+      <h1 class="font-serif text-4xl sm:text-5xl mb-1">MN Studio</h1>
+      <p class="text-stone-400 text-sm">Bespoke Hardwood Furniture · Nairobi, Kenya</p>
+    </div>
+
+    <!-- Body -->
+    <div class="p-8 sm:p-12">
+      
+      <!-- Certification Statement -->
+      <div class="text-center mb-10">
+        <p class="text-xs uppercase tracking-widest text-stone-500 mb-3">This certifies that</p>
+        <h2 class="font-serif text-4xl sm:text-5xl text-mahogany-700 mb-4">{{ cert.piece_name }}</h2>
+        <div class="space-y-1 text-stone-600">
+          <p class="text-base">was handcrafted for <strong class="text-charcoal-900">{{ cert.client_name_display }}</strong></p>
+          <p class="text-base">and completed on <strong class="text-charcoal-900">{{ cert.completion_date|date:"F d, Y" }}</strong></p>
+        </div>
+      </div>
+
+      <!-- Specifications Grid -->
+      <div class="grid grid-cols-2 gap-4 mb-8 text-sm print:text-xs">
+        <div class="bg-stone-50 border border-stone-300 rounded p-4">
+          <p class="text-xs uppercase tracking-wider text-stone-600 font-bold mb-1">Species</p>
+          <p class="font-serif text-charcoal-900 font-semibold">{{ cert.species_formatted }}</p>
+        </div>
+
+        <div class="bg-stone-50 border border-stone-300 rounded p-4">
+          <p class="text-xs uppercase tracking-wider text-stone-600 font-bold mb-1">Timber</p>
+          <p class="font-serif text-charcoal-900 font-semibold">{{ cert.total_board_feet }} BF</p>
+        </div>
+
+        {% if cert.primary_artisan %}
+        <div class="bg-stone-50 border border-stone-300 rounded p-4">
+          <p class="text-xs uppercase tracking-wider text-stone-600 font-bold mb-1">Artisan</p>
+          <p class="font-serif text-charcoal-900 font-semibold">{{ cert.primary_artisan.name }}</p>
+        </div>
+        {% endif %}
+
+        <div class="bg-stone-50 border border-stone-300 rounded p-4 flex items-center justify-center">
+          {% if qr_data %}
+          <img src="{{ qr_data }}" alt="QR Code" class="w-24 h-24">
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Certificate ID Footer -->
+      <div class="text-center pt-6 border-t border-stone-300">
+        <p class="text-xs text-stone-500 uppercase tracking-wider">Certificate ID</p>
+        <p class="font-mono text-sm font-semibold text-charcoal-900 mt-1">{{ cert.certificate_id_short }}</p>
+      </div>
+    </div>
+  </div>
 </div>
-<div class="border-deco">
-  <div style="text-align:center;margin-bottom:32px">
-    <p style="font-size:11px;color:#999;letter-spacing:3px;text-transform:uppercase">Certificate of Authenticity</p>
-    <h1 class="serif" style="font-size:40px;margin:8px 0;color:#1a1a1a">MN Studio</h1>
-    <p style="color:#666;font-size:13px">Bespoke Hardwood Furniture · Nairobi, Kenya</p>
-  </div>
-  <div style="text-align:center;border:1px solid #963d1b;padding:24px;margin-bottom:24px">
-    <p style="font-size:12px;color:#999;text-transform:uppercase;letter-spacing:2px">This certifies that</p>
-    <h2 class="serif" style="font-size:32px;margin:8px 0;color:#963d1b">{{ cert.piece_name }}</h2>
-    <p style="color:#666;font-size:14px">was handcrafted for <strong>{{ cert.client_name_display }}</strong><br>and completed on <strong>{{ cert.completion_date|date:"d F Y" }}</strong></p>
-  </div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;font-size:13px;margin-bottom:24px">
-    <div style="background:#f9f9f9;padding:12px">
-      <p style="font-size:10px;color:#999;text-transform:uppercase;letter-spacing:1px">Species</p>
-      <p style="font-weight:600">{% for s in cert.species_used %}{{ s }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
-    </div>
-    <div style="background:#f9f9f9;padding:12px">
-      <p style="font-size:10px;color:#999;text-transform:uppercase;letter-spacing:1px">Timber</p>
-      <p style="font-weight:600">{{ cert.total_board_feet }} Board Feet</p>
-    </div>
-    {% if cert.primary_artisan %}
-    <div style="background:#f9f9f9;padding:12px">
-      <p style="font-size:10px;color:#999;text-transform:uppercase;letter-spacing:1px">Artisan</p>
-      <p style="font-weight:600">{{ cert.primary_artisan.name }}</p>
-    </div>
-    {% endif %}
-    <div style="background:#f9f9f9;padding:12px;text-align:center">
-      {% if qr_data %}<img src="{{ qr_data }}" style="width:80px;height:80px">{% endif %}
-    </div>
-  </div>
-  <p style="text-align:center;font-size:10px;color:#ccc">Certificate ID: {{ cert.certificate_id }}</p>
-</div>
-</body>
-</html>
+
+<!-- Print Styles -->
+<style>
+  @media print {
+    body {
+      background: white;
+      padding: 0;
+    }
+    .max-w-2xl {
+      max-width: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    .bg-white {
+      box-shadow: none;
+    }
+  }
+</style>
+{% endblock %}

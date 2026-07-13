@@ -2,108 +2,127 @@
 
 {% extends "base.html" %}
 {% block title %}Live Architectural Auctions — MN Studio{% endblock %}
+
 {% block public_content %}
+<div class="min-h-screen bg-charcoal-950 text-white pt-24 pb-16 relative overflow-hidden">
+  <!-- Architectural Background Accent Waves -->
+  <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(184,111,86,0.04),transparent_50%)] pointer-events-none"></div>
 
-<div class="min-h-screen bg-charcoal-900 text-stone-100 py-16 px-6 sm:px-8 relative overflow-hidden">
-  <!-- Architectural background grid line accents -->
-  <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(184,79,32,0.03),transparent_50%)]"></div>
-
-  <div class="max-w-5xl mx-auto relative z-10">
-    <!-- Back Navigation Link -->
-    <a href="{% url 'home' %}" class="inline-flex items-center gap-1.5 text-stone-400 text-xs font-medium uppercase tracking-wider hover:text-white transition-colors group">
-      <span class="transform group-hover:-translate-x-1 transition-transform">&larr;</span> Return to Home
-    </a>
-    
-    <!-- Header Block -->
-    <div class="mt-8 mb-12">
-      <h1 class="font-serif text-4xl sm:text-5xl text-white tracking-tight leading-none mb-4">
-        Live <span class="italic font-normal text-mahogany-300">Auctions</span>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+    <!-- Header Controls Stage -->
+    <div class="mb-12 reveal">
+      <a href="{% url 'home' %}" class="inline-flex items-center gap-2 text-charcoal-400 text-sm hover:text-white transition-colors group mb-6">
+        <i data-lucide="arrow-left" class="w-4 h-4 transition-transform group-hover:-translate-x-1"></i>
+        Return to Home
+      </a>
+      
+      <div class="flex items-center gap-3 mb-4">
+        <span class="relative flex h-3 w-3">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+        </span>
+        <span class="text-xs font-bold uppercase tracking-[0.2em] text-red-400">Live Auction Floor</span>
+      </div>
+      
+      <h1 class="font-serif text-4xl sm:text-5xl lg:text-6xl text-white tracking-tight mb-4">
+        Live <span class="italic font-normal text-mahogany-400">Auctions</span>
       </h1>
-      <p class="text-stone-400 text-sm font-light max-w-xl leading-relaxed">
-        Secure immediate acquisition allocation on singular, hand-finished showcase pieces. Direct anti-sniping protection protocols are active on all open ledger items.
+      <p class="text-charcoal-400 text-base sm:text-lg max-w-xl leading-relaxed">
+        Secure immediate acquisition on singular, hand-finished showcase pieces. Anti-sniping protection active on all open lots.
       </p>
     </div>
 
-    <!-- Active Auction Lots Grid -->
+    <!-- Active Auction Matrix Gridscape -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
     {% for lot in lots %}
-      <a href="{% url 'storefront:auction_detail' lot.pk %}" class="block group bg-gradient-to-br from-white/[0.03] to-white/[0.01] border border-white/10 rounded-2xl p-6 lg:p-8 backdrop-blur-sm transition-all duration-300 hover:bg-white/[0.06] hover:border-mahogany-500/30 hover:shadow-xl hover:shadow-mahogany-950/40">
+      <article class="group relative bg-white/[0.02] border border-white/[0.06] rounded-2xl p-6 lg:p-8 backdrop-blur-sm transition-all duration-500 hover:bg-white/[0.04] hover:border-mahogany-500/30 hover:shadow-2xl hover:shadow-mahogany-950/20 reveal" 
+               style="animation-delay: {% cycle '100ms' '200ms' '300ms' '400ms' %};">
         
         <!-- Top Metadata Ribbon -->
-        <div class="flex justify-between items-center mb-5">
-          <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-widest bg-mahogany-700 text-white shadow-sm shadow-mahogany-900/30">
+        <div class="flex justify-between items-center mb-5 relative z-20">
+          <span class="inline-flex items-center px-3 py-1 rounded-lg bg-mahogany-700 text-white text-[10px] font-bold uppercase tracking-widest shadow-sm">
             {{ lot.get_status_display|default:"LIVE" }}
           </span>
-          <div class="flex items-center gap-1.5 text-xs text-stone-400">
-            <span class="w-1 h-1 rounded-full bg-stone-500"></span>
+          <div class="flex items-center gap-2 text-xs text-charcoal-400">
+            <i data-lucide="gavel" class="w-3.5 h-3.5"></i>
             <span class="font-mono">{{ lot.bid_count }} bids</span>
           </div>
         </div>
         
-        <!-- Smart Media Fallback Layer -->
-        <div class="w-full aspect-[16/10] rounded-xl overflow-hidden bg-charcoal-950 border border-white/5 relative mb-5">
-          {% if lot.image_url %}
-            <img src="{{ lot.image_url }}" alt="{{ lot.title }}" class="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105 opacity-80 group-hover:opacity-90">
-          {% ;; elif lot.product and lot.product.media.first %}
-            {% with lot.product.media.first as initial_media %}
-              {% if initial_media.media_type == 'VIDEO' %}
-                <video src="{{ initial_media.media_url }}" class="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105 opacity-75 group-hover:opacity-85" autoplay muted loop playsinline></video>
-              {% else %}
-                <img src="{{ initial_media.media_url }}" alt="{{ lot.title }}" class="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105 opacity-80 group-hover:opacity-90">
-              {% endif %}
-            {% endwith %}
+        <!-- Media Viewport Frame Layer -->
+        <div class="relative aspect-[16/10] rounded-xl overflow-hidden bg-charcoal-900 border border-white/5 mb-6 group-hover:border-white/10 transition-colors">
+          {% with lot.display_media as media %}
+          {% if media %}
+            {% if media.media_type == 'VIDEO' %}
+              <video src="{{ media.media_url }}" class="absolute inset-0 w-full h-full object-cover transition-all duration-700 group-hover:scale-105 opacity-75 group-hover:opacity-85" autoplay muted loop playsinline></video>
+            {% else %}
+              <img src="{{ media.media_url }}" alt="{{ lot.title }}" loading="lazy" class="absolute inset-0 w-full h-full object-cover transition-all duration-700 group-hover:scale-105 opacity-80 group-hover:opacity-90">
+            {% endif %}
           {% else %}
-            <div class="absolute inset-0 w-full h-full flex items-center justify-center bg-charcoal-950">
-              <img src="https://res.cloudinary.com/famfef4z/image/upload/v1783431102/mnStudio_ijiqh7.png" alt="MN Studio Fallback" class="w-auto max-h-12 object-contain opacity-20">
+            <div class="absolute inset-0 flex items-center justify-center">
+              <div class="text-center">
+                <i data-lucide="box" class="w-10 h-10 text-charcoal-700 mx-auto mb-2"></i>
+                <span class="text-xs text-charcoal-600 font-mono">No Preview</span>
+              </div>
             </div>
           {% endif %}
-          <div class="absolute inset-0 bg-gradient-to-t from-charcoal-950/50 via-transparent to-transparent z-10 pointer-events-none"></div>
+          {% endwith %}
+          <div class="absolute inset-0 bg-gradient-to-t from-charcoal-950/60 via-transparent to-transparent"></div>
+          
+          <!-- Interactive Action Hover Pane Overlay -->
+          <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20">
+            <span class="inline-flex items-center gap-2 bg-white text-charcoal-900 px-5 py-2.5 rounded-full text-sm font-medium transform translate-y-3 group-hover:translate-y-0 transition-transform duration-300 shadow-xl">
+              Place Bid
+              <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
+            </span>
+          </div>
         </div>
         
-        <!-- Content Space -->
+        <!-- Architectural Item Description Panel -->
         <div class="mb-6">
-          <h3 class="font-serif text-2xl text-white tracking-wide group-hover:text-mahogany-300 transition-colors duration-300 mb-2">
+          <h3 class="font-serif text-2xl text-white tracking-wide group-hover:text-mahogany-400 transition-colors duration-300 mb-2">
             {{ lot.title }}
           </h3>
-          <p class="text-stone-400 text-xs font-light leading-relaxed line-clamp-2">
+          <p class="text-charcoal-400 text-sm font-light leading-relaxed line-clamp-2">
             {{ lot.description }}
           </p>
         </div>
         
-        <!-- Bottom Pricing Ledger Section -->
+        <!-- Accounting & Clock Matrix Ledger -->
         <div class="pt-5 border-t border-white/5 flex justify-between items-end">
           <div>
-            <span class="text-[9px] font-bold uppercase tracking-widest text-stone-400 block mb-1">Current Allocation Bid</span>
+            <span class="text-[10px] font-bold uppercase tracking-widest text-charcoal-500 block mb-1">Current Bid</span>
             <span class="font-serif text-2xl text-white tracking-tight">KES {{ lot.current_bid|floatformat:0 }}</span>
           </div>
           <div class="text-right">
-            <span class="text-[9px] font-bold uppercase tracking-widest text-stone-500 block mb-1">Closes (EAT)</span>
-            <span class="text-xs text-stone-300 font-medium font-mono">{{ lot.end_time|date:"d M, H:i" }}</span>
+            <span class="text-[10px] font-bold uppercase tracking-widest text-charcoal-500 block mb-1">Closes (EAT)</span>
+            <span class="text-sm text-charcoal-300 font-medium font-mono flex items-center gap-1.5">
+              <i data-lucide="clock" class="w-3.5 h-3.5 text-mahogany-400"></i>
+              {{ lot.end_time|date:"d M, H:i" }}
+            </span>
           </div>
         </div>
-
-      </a>
+        
+        <!-- Global Context Action Hyperlink Canvas Layer -->
+        <a href="{% url 'storefront:auction_detail' lot.pk %}" class="absolute inset-0 z-10" aria-label="View specifications and bid on {{ lot.title }}"></a>
+      </article>
     {% empty %}
-      <!-- Elegant Empty State Fallback Container -->
-      <div class="col-span-1 md:col-span-2 border border-dashed border-white/10 rounded-2xl py-20 px-6 text-center bg-white/[0.01]">
-        <div class="w-12 h-12 border border-white/10 rounded-full flex items-center justify-center text-stone-500 mx-auto mb-4 bg-charcoal-950/50 shadow-sm">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-          </svg>
+      <!-- Zero State Alternative Notification System View -->
+      <div class="col-span-1 md:col-span-2 border border-dashed border-white/10 rounded-2xl py-24 px-6 text-center bg-white/[0.01] reveal">
+        <div class="w-16 h-16 border border-white/10 rounded-full flex items-center justify-center text-charcoal-500 mx-auto mb-6 bg-charcoal-900/50">
+          <i data-lucide="gavel" class="w-6 h-6"></i>
         </div>
-        <p class="font-serif text-xl text-stone-300 italic">No active production slots scheduled for public auction.</p>
-        <p class="text-stone-500 text-xs font-light mt-1 max-w-sm mx-auto leading-relaxed">
-          All active material slots are currently fully designated to existing workshop client registries.
+        <p class="font-serif text-2xl text-charcoal-300 italic mb-2">No active auctions</p>
+        <p class="text-charcoal-500 text-sm max-w-sm mx-auto leading-relaxed mb-8">
+          All production slots are currently designated to existing workshop clients.
         </p>
-        <div class="mt-6">
-          <a href="{% url 'storefront:waitlist' %}" class="inline-flex items-center gap-1.5 bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-stone-200 px-5 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors shadow-sm">
-            Join Workshop Allocation Waitlist &rarr;
-          </a>
-        </div>
+        <a href="{% url 'storefront:waitlist' %}" class="inline-flex items-center gap-2 bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-charcoal-200 px-6 py-3 rounded-xl text-sm font-bold uppercase tracking-wider transition-colors">
+          Join Workshop Waitlist
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        </a>
       </div>
     {% endfor %}
     </div>
   </div>
 </div>
-
 {% endblock %}

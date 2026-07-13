@@ -1,53 +1,93 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Certificate of Authenticity — {{ cert.piece_name }}</title>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style> body { font-family: 'Jost', sans-serif; } h1,h2,.serif { font-family: 'Cormorant Garamond', Georgia, serif; } </style>
-</head>
-<body class="bg-stone-100 min-h-screen flex items-center justify-center p-6">
-<div class="max-w-2xl w-full bg-white rounded-2xl shadow-2xl overflow-hidden">
-  <div class="bg-[#1a1a1a] p-8 text-center">
-    <p class="text-stone-400 text-xs uppercase tracking-widest mb-2">Certificate of Authenticity</p>
-    <h1 class="serif text-4xl text-white">MN Studio</h1>
-    <p class="text-stone-400 text-sm mt-1">Bespoke Hardwood Furniture · Nairobi, Kenya</p>
+{% extends "base.html" %}
+{% block title %}Certificate of Authenticity — {{ cert.piece_name }}{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 py-8">
+  <!-- Certificate Header -->
+  <div class="bg-charcoal-900 text-white rounded-t-2xl p-8 sm:p-12 text-center border-b border-mahogany-700">
+    <p class="text-xs uppercase tracking-widest text-stone-400 mb-2">Certificate of Authenticity</p>
+    <h1 class="font-serif text-4xl sm:text-5xl mb-2">MN Studio</h1>
+    <p class="text-stone-400 text-sm">Bespoke Hardwood Furniture · Nairobi, Kenya</p>
   </div>
-  <div class="p-8">
-    <div class="border-2 border-[#963d1b] rounded-xl p-6 mb-6">
-      <p class="text-xs text-stone-400 uppercase tracking-widest mb-2">This certifies that</p>
-      <h2 class="serif text-3xl text-[#1a1a1a] mb-1">{{ cert.piece_name }}</h2>
-      <p class="text-stone-500 text-sm">was crafted for <strong>{{ cert.client_name_display }}</strong> and completed on {{ cert.completion_date|date:"d F Y" }}</p>
+
+  <!-- Certificate Body -->
+  <div class="bg-white rounded-b-2xl shadow-lg p-8 sm:p-12 border border-stone-200 border-t-0">
+    
+    <!-- Certification Statement -->
+    <div class="border-2 border-mahogany-600 rounded-xl p-6 sm:p-8 mb-8 bg-stone-50/50">
+      <p class="text-xs uppercase tracking-widest text-stone-500 mb-3">This certifies that</p>
+      <h2 class="font-serif text-3xl sm:text-4xl text-mahogany-700 mb-3">{{ cert.piece_name }}</h2>
+      <div class="text-stone-600 text-sm space-y-2">
+        <p>was handcrafted for <strong class="text-charcoal-900">{{ cert.client_name_display }}</strong></p>
+        <p>and completed on <strong class="text-charcoal-900">{{ cert.completion_date|date:"F d, Y" }}</strong></p>
+      </div>
     </div>
-    <div class="grid grid-cols-2 gap-4 mb-6 text-sm">
-      <div class="bg-stone-50 rounded-lg p-3">
-        <p class="text-xs text-stone-400 uppercase tracking-wider mb-1">Species Used</p>
-        <p class="font-medium">{% for s in cert.species_used %}{{ s }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>
+
+    <!-- Specifications Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+      <div class="bg-stone-50 border border-stone-200 rounded-lg p-4">
+        <p class="text-xs uppercase tracking-wider text-stone-400 font-semibold mb-2">Species Used</p>
+        <p class="font-serif text-lg text-charcoal-900">{{ cert.species_formatted }}</p>
       </div>
-      <div class="bg-stone-50 rounded-lg p-3">
-        <p class="text-xs text-stone-400 uppercase tracking-wider mb-1">Total Timber</p>
-        <p class="font-medium">{{ cert.total_board_feet }} Board Feet</p>
+      
+      <div class="bg-stone-50 border border-stone-200 rounded-lg p-4">
+        <p class="text-xs uppercase tracking-wider text-stone-400 font-semibold mb-2">Total Timber</p>
+        <p class="font-serif text-lg text-charcoal-900">{{ cert.total_board_feet }} Board Feet</p>
       </div>
+
       {% if cert.primary_artisan %}
-      <div class="bg-stone-50 rounded-lg p-3">
-        <p class="text-xs text-stone-400 uppercase tracking-wider mb-1">Primary Artisan</p>
-        <p class="font-medium">{{ cert.primary_artisan.name }}</p>
+      <div class="bg-stone-50 border border-stone-200 rounded-lg p-4">
+        <p class="text-xs uppercase tracking-wider text-stone-400 font-semibold mb-2">Primary Artisan</p>
+        <p class="font-serif text-lg text-charcoal-900">{{ cert.primary_artisan.name }}</p>
       </div>
       {% endif %}
-      <div class="bg-stone-50 rounded-lg p-3">
-        <p class="text-xs text-stone-400 uppercase tracking-wider mb-1">Certificate ID</p>
-        <p class="font-mono text-xs break-all">{{ cert.certificate_id }}</p>
+
+      <div class="bg-stone-50 border border-stone-200 rounded-lg p-4">
+        <p class="text-xs uppercase tracking-wider text-stone-400 font-semibold mb-2">Certificate ID</p>
+        <p class="font-mono text-sm text-stone-600 break-all">{{ cert.certificate_id_short }}</p>
       </div>
     </div>
+
+    <!-- Care Instructions -->
     {% if cert.care_instructions %}
-    <div class="border-t border-stone-100 pt-4 mb-4">
-      <p class="text-xs text-stone-400 uppercase tracking-wider mb-2">Care Instructions</p>
-      <p class="text-sm text-stone-600">{{ cert.care_instructions }}</p>
+    <div class="border-t border-stone-200 pt-6 mb-8">
+      <h3 class="text-sm uppercase tracking-wider font-bold text-stone-500 mb-3">Care Instructions</h3>
+      <p class="text-stone-700 leading-relaxed whitespace-pre-line">{{ cert.care_instructions }}</p>
     </div>
     {% endif %}
-    <p class="text-center text-xs text-stone-300 mt-6">Verify this certificate at mnstudio.co.ke/certificates/{{ cert.certificate_id }}/</p>
+
+    <!-- Care Schedule -->
+    {% if care_schedules %}
+    <div class="border-t border-stone-200 pt-6 mb-8">
+      <h3 class="text-sm uppercase tracking-wider font-bold text-stone-500 mb-4">Recommended Care Schedule</h3>
+      <div class="space-y-2">
+        {% for schedule in care_schedules %}
+        <div class="flex items-center justify-between bg-stone-50 border border-stone-200 rounded-lg p-3">
+          <div class="flex items-center gap-3">
+            <span class="text-lg {% if schedule.completed %}text-emerald-600{% else %}text-stone-300{% endif %}">
+              {% if schedule.completed %}✓{% else %}○{% endif %}
+            </span>
+            <div>
+              <p class="text-sm font-semibold text-charcoal-900">{{ schedule.get_care_type_display }}</p>
+              <p class="text-xs text-stone-500">{{ schedule.due_date|date:"F d, Y" }}</p>
+            </div>
+          </div>
+          {% if schedule.notes %}
+          <p class="text-xs text-stone-500">{{ schedule.notes }}</p>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Verification Footer -->
+    <div class="border-t border-stone-200 pt-6 text-center">
+      <p class="text-xs text-stone-500 mb-2">Verify this certificate at</p>
+      <p class="font-mono text-xs text-stone-600 break-all">
+        {{ request.build_absolute_uri request.path }}
+      </p>
+    </div>
   </div>
 </div>
-</body>
-</html>
+{% endblock %}

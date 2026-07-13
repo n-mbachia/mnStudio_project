@@ -1,121 +1,195 @@
+<!-- ./templates/storefront/waitlist.html --> 
+
 {% extends "base.html" %}
-{% block title %}Commission Allocations &amp; Waitlist — MN Studio{% endblock %}
+{% block title %}Commission Allocations & Waitlist — MN Studio{% endblock %}
+
 {% block public_content %}
+<div class="min-h-screen bg-stone-50 flex items-center justify-center p-4 sm:p-6 lg:p-8 relative overflow-hidden pt-24">
+  <!-- Background accents -->
+  <div class="absolute inset-y-0 left-1/4 w-px bg-charcoal-200/30 pointer-events-none hidden md:block"></div>
+  <div class="absolute inset-y-0 left-3/4 w-px bg-charcoal-200/30 pointer-events-none hidden md:block"></div>
 
-<div class="min-h-screen bg-stone-50 flex items-center justify-center p-6 sm:p-8 relative overflow-hidden">
-  <!-- Subtle design accent grid lines in background -->
-  <div class="absolute inset-y-0 left-1/4 w-px bg-stone-200/40 pointer-events-none hidden md:block"></div>
-  <div class="absolute inset-y-0 left-3/4 w-px bg-stone-200/40 pointer-events-none hidden md:block"></div>
-
-  <div class="max-w-xl w-full relative z-10 py-12">
-    <!-- Back Navigation Link -->
-    <a href="{% url 'home' %}" class="inline-flex items-center gap-1.5 text-stone-400 text-xm font-medium uppercase tracking-wider hover:text-stone-600 transition-colors group">
-      <span class="transform group-hover:-translate-x-1 transition-transform">&larr;</span> Return to Home
+  <div class="max-w-2xl w-full relative z-10 py-12">
+    <!-- Back Navigation -->
+    <a href="{% url 'home' %}" class="inline-flex items-center gap-2 text-charcoal-400 text-sm font-medium uppercase tracking-wider hover:text-charcoal-600 transition-colors group mb-8 reveal">
+      <i data-lucide="arrow-left" class="w-4 h-4 transition-transform group-hover:-translate-x-1"></i>
+      Return to Home
     </a>
     
-    <div class="mt-8 mb-10">
+    <div class="mb-10 reveal">
+      <p class="text-xs font-bold uppercase tracking-[0.2em] text-mahogany-600 mb-3">Limited Availability</p>
       <h1 class="font-serif text-4xl sm:text-5xl text-charcoal-900 tracking-tight">
-        Request a <span class="italic font-normal text-mahogany-500">Commission Slot</span>
+        Request a <span class="italic font-normal text-mahogany-600">Commission Slot</span>
       </h1>
-      <p class="text-stone-500 text-xm mt-3 font-light leading-relaxed max-w-lg">
-        To maintain our commitment to generational joinery quality, we accept a finite number of architectural commissions each cycle. Outline your design vision below, and we will initiate contact when production capacity aligns.
+      <p class="text-charcoal-500 text-base mt-4 font-light leading-relaxed max-w-lg">
+        To maintain our commitment to generational joinery quality, we accept a finite number of architectural commissions each cycle. 
+        Outline your design vision below.
       </p>
     </div>
 
-    <!-- Form Container Card -->
-    <div class="bg-white rounded-2xl shadow-sm border border-mahogany-500 p-6 sm:p-10">
-      <!-- Added enctype attribute to process file binary streams -->
-      <form method="post" enctype="multipart/form-data" class="space-y-5">
+    <!-- Form Card -->
+    <div class="bg-white rounded-2xl shadow-sm border border-charcoal-100 p-6 sm:p-10 reveal" style="animation-delay: 100ms">
+      
+      <!-- Global Error Banner for Django Non-Field Errors -->
+      {% if form.non_field_errors %}
+        <div class="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl font-medium">
+          {% for error in form.non_field_errors %}
+            <p>{{ error }}</p>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      <form method="post" enctype="multipart/form-data" class="space-y-6" x-data="{ 
+        email: '',
+        fileName: '', 
+        fileSelected: false,
+        submitting: false
+      }" @submit="submitting = true">
         {% csrf_token %}
         
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
           <!-- Full Name -->
           <div class="sm:col-span-2">
-            <label class="label text-[12px] uppercase tracking-wider font-semibold text-stone-700 block mb-1" for="id_name">Full Name</label>
-            <input id="id_name" name="name" required class="input" placeholder="e.g., Malik Ndwiga">
+            <label class="block text-xs uppercase tracking-wider font-semibold text-charcoal-700 mb-2" for="id_name">
+              Full Name <span class="text-red-500">*</span>
+            </label>
+            <div class="relative">
+              <i data-lucide="user" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-charcoal-400"></i>
+              <input id="id_name" name="name" required 
+                     value="{{ form.name.value|default:'' }}"
+                     class="w-full pl-11 pr-4 py-3 bg-stone-50 border {% if form.name.errors %}border-red-400{% else %}border-charcoal-200{% endif %} rounded-xl text-charcoal-900 placeholder-charcoal-400 text-sm focus:outline-none focus:border-mahogany-500 focus:ring-2 focus:ring-mahogany-500/10 transition-all"
+                     placeholder="e.g., Malik Ndwiga">
+            </div>
+            {% if form.name.errors %}<p class="text-red-500 text-xs mt-1 font-medium">{{ form.name.errors.0 }}</p>{% endif %}
           </div>
           
           <!-- Email -->
           <div>
-            <label class="label text-[12px] uppercase tracking-wider font-semibold text-stone-700 block mb-1" for="id_email">Email Address</label>
-            <input id="id_email" name="email" type="email" required class="input" placeholder="name@domain.com">
+            <label class="block text-xs uppercase tracking-wider font-semibold text-charcoal-700 mb-2" for="id_email">
+              Email Address <span class="text-red-500">*</span>
+            </label>
+            <div class="relative">
+              <i data-lucide="mail" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-charcoal-400"></i>
+              <input id="id_email" name="email" type="email" required 
+                     x-model="email"
+                     init="email = '{{ form.email.value|default:'' }}'"
+                     class="w-full pl-11 pr-4 py-3 bg-stone-50 border {% if form.email.errors %}border-red-400{% else %}border-charcoal-200{% endif %} rounded-xl text-charcoal-900 placeholder-charcoal-400 text-sm focus:outline-none focus:border-mahogany-500 focus:ring-2 focus:ring-mahogany-500/10 transition-all"
+                     placeholder="name@domain.com">
+            </div>
+            {% if form.email.errors %}<p class="text-red-500 text-xs mt-1 font-medium">{{ form.email.errors.0 }}</p>{% endif %}
           </div>
           
           <!-- Phone -->
           <div>
-            <label class="label text-[12px] uppercase tracking-wider font-semibold text-stone-700 block mb-1" for="id_phone">Phone (Optional)</label>
-            <input id="id_phone" name="phone" class="input" placeholder="+254 700 000000">
-          </div>
-          
-          <!-- Design Vision -->
-          <div class="sm:col-span-2">
-            <label class="label text-[12px] uppercase tracking-wider font-semibold text-stone-700 block mb-1" for="id_piece_of_interest">Piece Architecture &amp; Timber</label>
-            <input id="id_piece_of_interest" name="piece_of_interest" required class="input" placeholder="e.g., 8-Seater live-edge dining table in Mvule">
-          </div>
-          
-          <!-- Budget Selection -->
-          <div>
-            <label class="label text-[12px] uppercase tracking-wider font-semibold text-stone-700 block mb-1" for="id_budget_range">Budget Range</label>
+            <label class="block text-xs uppercase tracking-wider font-semibold text-charcoal-700 mb-2" for="id_phone">
+              Phone <span class="text-charcoal-400 font-normal">(Optional)</span>
+            </label>
             <div class="relative">
-              <select id="id_budget_range" name="budget_range" class="input appearance-none bg-no-repeat bg-[right_10px_center]" required>
-                <option value="" disabled selected hidden>Select range...</option>
+              <i data-lucide="phone" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-charcoal-400"></i>
+              <input id="id_phone" name="phone" 
+                     value="{{ form.phone.value|default:'' }}"
+                     class="w-full pl-11 pr-4 py-3 bg-stone-50 border {% if form.phone.errors %}border-red-400{% else %}border-charcoal-200{% endif %} rounded-xl text-charcoal-900 placeholder-charcoal-400 text-sm focus:outline-none focus:border-mahogany-500 focus:ring-2 focus:ring-mahogany-500/10 transition-all"
+                     placeholder="+254 700 000000">
+            </div>
+            {% if form.phone.errors %}<p class="text-red-500 text-xs mt-1 font-medium">{{ form.phone.errors.0 }}</p>{% endif %}
+          </div>
+          
+          <!-- Piece of Interest -->
+          <div class="sm:col-span-2">
+            <label class="block text-xs uppercase tracking-wider font-semibold text-charcoal-700 mb-2" for="id_piece_of_interest">
+              Piece Architecture & Timber <span class="text-red-500">*</span>
+            </label>
+            <div class="relative">
+              <i data-lucide="box" class="absolute left-4 top-3.5 w-4 h-4 text-charcoal-400"></i>
+              <input id="id_piece_of_interest" name="piece_of_interest" required 
+                     value="{{ form.piece_of_interest.value|default:'' }}"
+                     class="w-full pl-11 pr-4 py-3 bg-stone-50 border {% if form.piece_of_interest.errors %}border-red-400{% else %}border-charcoal-200{% endif %} rounded-xl text-charcoal-900 placeholder-charcoal-400 text-sm focus:outline-none focus:border-mahogany-500 focus:ring-2 focus:ring-mahogany-500/10 transition-all"
+                     placeholder="e.g., 8-Seater live-edge dining table in Mvule">
+            </div>
+            {% if form.piece_of_interest.errors %}<p class="text-red-500 text-xs mt-1 font-medium">{{ form.piece_of_interest.errors.0 }}</p>{% endif %}
+          </div>
+          
+          <!-- Budget Range -->
+          <div>
+            <label class="block text-xs uppercase tracking-wider font-semibold text-charcoal-700 mb-2" for="id_budget_range">
+              Budget Range <span class="text-red-500">*</span>
+            </label>
+            <div class="relative">
+              <i data-lucide="banknote" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-charcoal-400"></i>
+              <select id="id_budget_range" name="budget_range" required 
+                      class="w-full pl-11 pr-10 py-3 bg-stone-50 border {% if form.budget_range.errors %}border-red-400{% else %}border-charcoal-200{% endif %} rounded-xl text-charcoal-900 text-sm focus:outline-none focus:border-mahogany-500 focus:ring-2 focus:ring-mahogany-500/10 transition-all appearance-none cursor-pointer">
+                <option value="" disabled selected hidden>Select your budget range...</option>
                 {% for val, label in budget_ranges %}
-                  <option value="{{ val }}">{{ label }}</option>
+                  <option value="{{ val }}" {% if form.budget_range.value == val %}selected{% endif %}>{{ label }}</option>
                 {% endfor %}
               </select>
+              <i data-lucide="chevron-down" class="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-charcoal-400 pointer-events-none"></i>
             </div>
+            {% if form.budget_range.errors %}<p class="text-red-500 text-xs mt-1 font-medium">{{ form.budget_range.errors.0 }}</p>{% endif %}
           </div>
           
           <!-- Timeline -->
           <div>
-            <label class="label text-[12px] uppercase tracking-wider font-semibold text-stone-700 block mb-1" for="id_timeline_months">Desired Timeline (Months)</label>
-            <input id="id_timeline_months" name="timeline_months" type="number" min="1" max="36" value="3" class="input">
+            <label class="block text-xs uppercase tracking-wider font-semibold text-charcoal-700 mb-2" for="id_timeline_months">
+              Desired Timeline (Months)
+            </label>
+            <div class="relative">
+              <i data-lucide="calendar" class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-charcoal-400"></i>
+              <input id="id_timeline_months" name="timeline_months" type="number" min="1" max="36" 
+                     value="{{ form.timeline_months.value|default:3 }}" 
+                     class="w-full pl-11 pr-4 py-3 bg-stone-50 border {% if form.timeline_months.errors %}border-red-400{% else %}border-charcoal-200{% endif %} rounded-xl text-charcoal-900 text-sm focus:outline-none focus:border-mahogany-500 focus:ring-2 focus:ring-mahogany-500/10 transition-all">
+            </div>
+            {% if form.timeline_months.errors %}<p class="text-red-500 text-xs mt-1 font-medium">{{ form.timeline_months.errors.0 }}</p>{% endif %}
           </div>
 
-          <!-- Premium Architectural Reference Image Upload Input Field -->
+          <!-- File Upload -->
           <div class="sm:col-span-2">
-            <label class="label text-[12px] uppercase tracking-wider font-semibold text-stone-700 block mb-1" for="id_reference_image">
-              Design References / Site Space Photos <span class="text-stone-400 lowercase font-normal italic">(Optional)</span>
+            <label class="block text-xs uppercase tracking-wider font-semibold text-charcoal-700 mb-2" for="id_reference_image">
+              Design References / Site Photos <span class="text-charcoal-400 font-normal normal-case">(Optional)</span>
             </label>
-            <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border border-dashed border-stone-300 rounded-xl hover:border-mahogany-500/40 transition-colors bg-stone-50/40 relative">
-              <div class="space-y-1 text-center">
-                <svg class="mx-auto h-8 w-8 text-stone-400 font-light" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
-                  <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4-4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                </svg>
-                <div class="flex text-xs text-stone-500 justify-center">
-                  <label for="id_reference_image" class="relative cursor-pointer rounded-md font-semibold text-mahogany-600 hover:text-mahogany-500 focus-within:outline-none">
-                    <span>Upload a layout blueprint</span>
-                    <input id="id_reference_image" name="reference_image" type="file" accept="image/*" class="sr-only">
-                  </label>
+            <div class="mt-1">
+              <div class="flex justify-center px-6 pt-8 pb-8 border-2 border-dashed border-charcoal-200 rounded-xl hover:border-mahogany-400 transition-colors bg-stone-50/50 relative cursor-pointer"
+                   :class="fileSelected ? 'border-mahogany-400 bg-mahogany-50/30' : ''"
+                   @click="$refs.fileInput.click()">
+                <input id="id_reference_image" name="reference_image" type="file" accept="image/*" class="hidden" x-ref="fileInput"
+                       @change="fileName = $event.target.files[0]?.name || ''; fileSelected = !!$event.target.files[0]">
+                <div class="space-y-2 text-center">
+                  <div class="w-12 h-12 rounded-full bg-white border border-charcoal-200 flex items-center justify-center mx-auto shadow-sm">
+                    <i data-lucide="upload-cloud" class="w-5 h-5 text-mahogany-500"></i>
+                  </div>
+                  <div class="flex text-sm text-charcoal-600 justify-center">
+                    <span class="font-medium text-mahogany-600" x-text="fileSelected ? fileName : 'Click to upload a reference image'"></span>
+                  </div>
+                  <p class="text-xs text-charcoal-400 font-mono" x-show="!fileSelected">PNG, JPG, WEBP up to 10MB</p>
+                  <p class="text-xs text-mahogany-600 font-medium" x-show="fileSelected" x-cloak>
+                    <i data-lucide="check-circle" class="w-3.5 h-3.5 inline mr-1"></i>
+                    File selected
+                  </p>
                 </div>
-                <p class="text-[10px] text-stone-400 font-mono">PNG, JPG, WEBP up to 10MB</p>
               </div>
             </div>
+            {% if form.reference_image.errors %}<p class="text-red-500 text-xs mt-1 font-medium">{{ form.reference_image.errors.0 }}</p>{% endif %}
           </div>
         </div>
         
-        <!-- Action Submission Interface -->
-        <div class="pt-4">
-          <button type="submit" class="w-full inline-flex items-center justify-center gap-2 bg-stone-100 hover:bg-stone-200/80 text-mahogany-500 border border-stone-300/80 px-6 py-3.5 text-xm uppercase tracking-widest font-bold rounded-xl transition-colors shadow-sm">
-            Submit Commission Query &rarr;
+        <!-- Submit -->
+        <div class="pt-2">
+          <button type="submit" 
+                  :disabled="submitting"
+                  class="w-full inline-flex items-center justify-center gap-3 bg-mahogany-700 hover:bg-mahogany-800 disabled:bg-charcoal-300 text-white px-6 py-4 rounded-xl text-sm uppercase tracking-widest font-bold transition-all shadow-sm hover:shadow-md disabled:cursor-not-allowed">
+            <i data-lucide="send" class="w-4 h-4" x-show="!submitting"></i>
+            <i data-lucide="loader-2" class="w-4 h-4 animate-spin" x-show="submitting" x-cloak></i>
+            <span x-text="submitting ? 'Submitting...' : 'Submit Commission Request'"></span>
           </button>
         </div>
       </form>
     </div>
     
-    <!-- Fine print footer notice -->
-    <p class="text-center text-[15px] text-stone-400 font-medium mt-6 max-w-md mx-auto leading-relaxed">
-      By executing a waitlist request, you confirm that your configuration aligns with custom, hand-finished production structures.
+    <!-- Footer notice -->
+    <p class="text-center text-xs text-charcoal-400 mt-6 max-w-md mx-auto leading-relaxed reveal">
+      By submitting, you confirm that your configuration aligns with custom, hand-finished production structures. 
+      We respect your privacy and will never share your details.
     </p>
   </div>
 </div>
-
-<!-- Script utility providing visual name updates on file attachment drop selection -->
-<script>
-  document.getElementById('id_reference_image').addEventListener('change', function(e) {
-    const fileName = e.target.files[0] ? e.target.files[0].name : "Upload a layout blueprint";
-    e.target.closest('div').querySelector('span').textContent = "Selected: " + fileName;
-  });
-</script>
-
 {% endblock %}

@@ -1,198 +1,234 @@
 <!-- templates/storefront/product_detail.html -->
 
+
 {% extends "base.html" %}
 {% block title %}{{ product.name }} — Registry Design — MN Studio{% endblock %}
+
 {% block public_content %}
+<!-- MAIN VIEWPORT COMPONENT CONTAINER -->
+<div class="min-h-screen bg-white pt-24 pb-16" 
+     x-data="{ 
+       viewMode: 'gallery', 
+       currentMediaIndex: 0,
+       mediaCount: {{ media_items|length }},
+       rotationInterval: null,
+       mediaList: [
+         {% for item in media_items %}
+           { url: '{{ item.media_url }}', type: '{{ item.media_type }}', thumb: '{{ item.thumbnail_url|default:item.media_url }}' }{% if not forloop.last %},{% endif %}
+         {% endfor %}
+       ],
+       init() {
+         if (this.mediaCount > 1) {
+           this.rotationInterval = setInterval(() => {
+             this.currentMediaIndex = (this.currentMediaIndex + 1) % this.mediaCount;
+           }, 5000);
+         }
+       },
+       selectMedia(index) {
+         if (this.rotationInterval) clearInterval(this.rotationInterval);
+         this.currentMediaIndex = index;
+       }
+     }">
+  
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <!-- Breadcrumb -->
+    <nav class="flex items-center gap-2 text-sm text-charcoal-400 mb-8 reveal">
+      <a href="/" class="hover:text-charcoal-900 transition-colors">Home</a>
+      <i data-lucide="chevron-right" class="w-4 h-4"></i>
+      <a href="{% url 'storefront:product_list' %}" class="hover:text-charcoal-900 transition-colors">Collection</a>
+      <i data-lucide="chevron-right" class="w-4 h-4"></i>
+      <span class="text-charcoal-900 font-medium truncate">{{ product.name }}</span>
+    </nav>
 
-<div class="min-h-screen bg-stone-50 text-charcoal-900 py-16 px-6 sm:px-8 relative overflow-hidden" x-data="{ viewMode: 'gallery' }">
-  <!-- Subtle minimalist design line accents -->
-  <div class="absolute inset-y-0 left-1/4 w-px bg-stone-200/40 pointer-events-none hidden lg:block"></div>
-  <div class="absolute inset-y-0 left-3/4 w-px bg-stone-200/40 pointer-events-none hidden lg:block"></div>
-
-  <div class="max-w-5xl mx-auto relative z-10">
-    <!-- Back to Collection Navigation -->
-    <a href="{% url 'storefront:product_list' %}" class="inline-flex items-center gap-1.5 text-stone-400 text-xs font-medium uppercase tracking-wider hover:text-stone-800 transition-colors group">
-      <span class="transform group-hover:-translate-x-1 transition-transform">&larr;</span> Back to Registry Collection
-    </a>
-
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 mt-8 items-start">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
       
-      <!-- Left Column: Media Gallery Showcase & Blueprint Viewer (6 Columns) -->
-      <div class="lg:col-span-6 space-y-4">
+      <!-- Left Column: Unified Gallery & Blueprints -->
+      <div class="lg:col-span-7 space-y-6 reveal">
         
-        <!-- Tab Controls for Aesthetic Showcase vs. Architectural Fit -->
-        {% if has_architectural_specs %}
-        <div class="flex bg-stone-200/50 p-1 rounded-xl border border-stone-300/40 space-x-1">
-          <button @click="viewMode = 'gallery'" 
-                  :class="viewMode ============= 'gallery' ? 'bg-white text-charcoal-900 shadow-sm' : 'text-stone-500 hover:text-stone-900'"
-                  class="flex-1 text-center py-2 text-[11px] font-bold uppercase tracking-wider rounded-lg transition-all">
-            📸 Product Presentation
-          </button>
-          <button @click="viewMode = 'blueprint'" 
-                  :class="viewMode ============= 'blueprint' ? 'bg-white text-charcoal-900 shadow-sm' : 'text-stone-500 hover:text-stone-900'"
-                  class="flex-1 text-center py-2 text-[11px] font-bold uppercase tracking-wider rounded-lg transition-all">
-            📐 Architectural Blueprint
-          </button>
-        </div>
-        {% endif %}
-
-        <!-- Main Display Frame -->
-        <div class="bg-white rounded-2xl aspect-[4/3] sm:aspect-[16/11] flex items-center justify-center overflow-hidden border border-stone-200/60 shadow-sm relative group">
+        <!-- Main Media Stage -->
+        <div class=" flex items-center justify-center p-4 min-h-[400px] sm:min-h-[520px] max-h-[700px] relative group overflow-hidden">
           
-          <!-- Standard Gallery View Mode -->
-          <div x-show="viewMode === 'gallery'" class="w-full h-full">
+          <!-- Gallery State Manager -->
+          <div x-show="viewMode === 'gallery'" x-transition:enter="transition ease-out duration-200" class="w-full h-full flex items-center justify-center">
             {% if media_items %}
-              <div id="featured-viewport" class="w-full h-full">
-                {% with media_items|first as default_media %}
-                  {% if default_media.media_type == 'VIDEO' %}
-                    <video src="{{ default_media.media_url }}" class="w-full h-full object-cover object-center" autoplay muted loop playsinline></video>
-                  {% else %}
-                    <img src="{{ default_media.media_url }}" alt="{{ product.name }}" class="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-102">
-                  {% endif %}
-                {% endwith %}
+              <div class="w-full h-full flex items-center justify-center">
+                <template x-for="(media, index) in mediaList" :key="index">
+                  <div x-show="currentMediaIndex === index" class="w-full h-full flex items-center justify-center" x-transition:enter="transition ease-out duration-300 opacity-0" x-transition:enter-end="opacity-100">
+                    <template x-if="media.type === 'VIDEO'">
+                      <video :src="media.url" class="max-w-full max-h-[650px] w-auto h-auto object-contain rounded-xl" controls autoplay muted loop playsinline></video>
+                    </template>
+                    <template x-if="media.type !== 'VIDEO'">
+                      <img :src="media.url" alt="{{ product.name }}" class="max-w-full max-h-[650px] w-auto h-auto object-contain rounded-xl">
+                    </template>
+                  </div>
+                </template>
               </div>
-              <div class="absolute inset-0 bg-gradient-to-t from-stone-900/5 to-transparent mix-blend-multiply pointer-events-none"></div>
             {% else %}
-              <div class="absolute inset-0 bg-gradient-to-br from-stone-50 to-stone-100 flex flex-col items-center justify-center text-center p-6">
-                <div class="w-12 h-12 border border-stone-200 rounded-full flex items-center justify-center text-stone-400 font-mono text-xs mb-2">3D</div>
-                <span class="text-[10px] uppercase tracking-widest text-stone-400 font-mono">Media Asset Render Pending</span>
+              <div class="text-center p-8">
+                <div class="w-16 h-16 rounded-full bg-charcoal-100 flex items-center justify-center mx-auto mb-4">
+                  <i data-lucide="image-off" class="w-8 h-8 text-charcoal-400"></i>
+                </div>
+                <p class="text-charcoal-500 font-mono text-xs uppercase tracking-wider">Render Pipeline Pending</p>
               </div>
             {% endif %}
           </div>
 
-          <!-- Architectural Line-Drawing View Mode -->
+          <!-- Blueprint Technical State Manager -->
           {% if has_architectural_specs %}
-          <div x-show="viewMode === 'blueprint'" class="w-full h-full bg-white flex flex-col justify-between p-8" x-cloak>
+          <div x-show="viewMode === 'blueprint'" x-cloak x-transition:enter="transition ease-out duration-200" class="w-full h-full bg-white flex flex-col justify-between items-center py-6 px-4">
             {% if product.architectural_drawing_url %}
-              <img src="{{ product.architectural_drawing_url }}" alt="Technical drawing layout specifications for {{ product.name }}" class="w-full h-5/6 object-contain mx-auto">
-              <span class="text-[10px] uppercase font-mono tracking-widest text-stone-400 block text-center border-t pt-3">
-                Architectural Drawing Reference Vector
-              </span>
+              <div class="w-full flex-1 flex items-center justify-center min-h-[350px]">
+                <img src="{{ product.architectural_drawing_url }}" alt="Technical schematic" class="max-w-full max-h-[500px] w-auto h-auto object-contain mix-blend-darken filter contrast-125">
+              </div>
+              <div class="w-full max-w-md border-t border-charcoal-100 pt-4 mt-6 text-center">
+                <span class="text-[10px] uppercase font-mono tracking-[0.25em] text-charcoal-400 block">Studio Vector Reference // Scale-Verified</span>
+              </div>
             {% else %}
-              <div class="my-auto text-center p-4">
-                <span class="text-3xl block mb-2">📐</span>
-                <p class="text-xs text-charcoal-900 font-mono uppercase tracking-wider font-semibold">Technical Profile Charted</p>
-                <p class="text-stone-500 text-[11px] mt-1 max-w-sm mx-auto">Sizing metadata is logged below. Complete structural blueprint render is available via active consultation channels.</p>
+              <div class="my-auto text-center py-12 px-6 border border-dashed border-charcoal-200 rounded-xl bg-stone-50 max-w-sm">
+                <i data-lucide="ruler" class="w-10 h-10 text-charcoal-300 mx-auto mb-3"></i>
+                <p class="text-xs text-charcoal-900 font-mono uppercase tracking-widest font-semibold">Technical Profile Logged</p>
+                <p class="text-charcoal-500 text-sm mt-2 leading-relaxed">Complete schematic blueprints available via studio design desks.</p>
               </div>
             {% endif %}
           </div>
           {% endif %}
-
+          
+          <!-- Edge Navigators -->
+          <template x-if="mediaCount > 1 && viewMode === 'gallery'">
+            <div>
+              <button @click="selectMedia((currentMediaIndex - 1 + mediaCount) % mediaCount)" class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm shadow-lg flex items-center justify-center text-charcoal-700 hover:bg-white transition-all opacity-0 group-hover:opacity-100 z-20">
+                <i data-lucide="chevron-left" class="w-5 h-5"></i>
+              </button>
+              <button @click="selectMedia((currentMediaIndex + 1) % mediaCount)" class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm shadow-lg flex items-center justify-center text-charcoal-700 hover:bg-white transition-all opacity-0 group-hover:opacity-100 z-20">
+                <i data-lucide="chevron-right" class="w-5 h-5"></i>
+              </button>
+            </div>
+          </template>
         </div>
 
-        <!-- Secondary Carousel Thumbnail Strip (Hidden when exploring blueprints to maintain focus) -->
-        {% if media_items|length > 1 %}
-        <div x-show="viewMode === 'gallery'" class="flex items-center gap-3 overflow-x-auto pb-1 custom-scrollbar">
-          {% for item in media_items %}
-            <button class="w-20 h-16 rounded-lg overflow-hidden border {% if forloop.first %}border-mahogany-600{% else %}border-stone-200/80{% endif %} bg-white shadow-sm shrink-0 transition-all hover:border-mahogany-500"
-                    onclick="switchShowcase('{{ item.media_url }}', '{{ item.media_type }}', this)">
-              {% if item.media_type == 'VIDEO' %}
-                <div class="w-full h-full relative bg-stone-900 flex items-center justify-center">
-                  <img src="{{ item.thumbnail_url|default:item.media_url }}" class="w-full h-full object-cover opacity-60">
-                  <span class="absolute text-[10px] bg-black/40 text-white px-1 rounded font-mono scale-90">MOV</span>
-                </div>
-              {% else %}
-                <img src="{{ item.media_url }}" alt="Configuration view" class="w-full h-full object-cover">
-              {% endif %}
-            </button>
-          {% endfor %}
+        <!-- Horizontal Thumbnail Strip -->
+        <template x-if="mediaCount > 1 && viewMode === 'gallery'">
+          <div class="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-hide">
+            <template x-for="(media, index) in mediaList" :key="index">
+              <button @click="selectMedia(index)" 
+                      class="shrink-0 w-20 h-16 rounded-xl overflow-hidden border-2 transition-all hover:border-mahogany-400"
+                      :class="currentMediaIndex === index ? 'border-mahogany-600 ring-2 ring-mahogany-200' : 'border-charcoal-200'">
+                <template x-if="media.type === 'VIDEO'">
+                  <div class="w-full h-full relative bg-charcoal-900 flex items-center justify-center">
+                    <img :src="media.thumb" class="w-full h-full object-cover opacity-60">
+                    <div class="absolute inset-0 flex items-center justify-center">
+                      <div class="w-6 h-6 rounded-full bg-black/50 flex items-center justify-center">
+                        <i data-lucide="play" class="w-3 h-3 text-white fill-white"></i>
+                      </div>
+                    </div>
+                  </div>
+                </template>
+                <template x-if="media.type !== 'VIDEO'">
+                  <img :src="media.url" class="w-full h-full object-cover bg-stone-50">
+                </template>
+              </button>
+            </template>
+          </div>
+        </template>
+        
+        <!-- Toggle System Layout Switches -->
+        {% if has_architectural_specs %}
+        <div class="flex bg-stone-100 p-1 rounded-xl max-w-sm mx-auto">
+          <button @click="viewMode = 'gallery'" 
+                  :class="viewMode === 'gallery' ? 'bg-white text-charcoal-900 shadow-sm font-semibold' : 'text-charcoal-400 hover:text-charcoal-700'"
+                  class="flex-1 text-center py-2.5 text-[11px] uppercase tracking-widest rounded-lg transition-all font-mono flex items-center justify-center gap-2">
+            <i data-lucide="image" class="w-3.5 h-3.5"></i> Showcase
+          </button>
+          <button @click="viewMode = 'blueprint'" 
+                  :class="viewMode === 'blueprint' ? 'bg-white text-charcoal-900 shadow-sm font-semibold' : 'text-charcoal-400 hover:text-charcoal-700'"
+                  class="flex-1 text-center py-2.5 text-[11px] uppercase tracking-widest rounded-lg transition-all font-mono flex items-center justify-center gap-2">
+            <i data-lucide="ruler" class="w-3.5 h-3.5"></i> Blueprint
+          </button>
         </div>
         {% endif %}
       </div>
 
-      <!-- Right Column: Specification Architecture Ledger (6 Columns) -->
-      <div class="lg:col-span-6 space-y-8">
+      <!-- Right Column: Meta Information & Specifications -->
+      <div class="lg:col-span-5 space-y-8 lg:pt-4 reveal" style="animation-delay: 200ms">
         <div>
-          <!-- Category Tracker -->
-          <span class="inline-flex text-[10px] font-bold uppercase tracking-[0.2em] text-mahogany-600 mb-2 block">
-            {{ product.get_category_display }}
-          </span>
+          <div class="flex items-center gap-3 mb-4">
+            <span class="inline-flex items-center px-3 py-1 rounded-full bg-mahogany-50 text-mahogany-700 text-[10px] font-bold uppercase tracking-[0.2em]">
+              {{ product.get_category_display }}
+            </span>
+            {% if product.is_featured %}
+            <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-amber-50 text-amber-700 text-[10px] font-bold uppercase tracking-wider">
+              <i data-lucide="star" class="w-3 h-3"></i> Featured
+            </span>
+            {% endif %}
+          </div>
           
-          <!-- Master Designation Title -->
-          <h1 class="font-serif text-4xl sm:text-5xl text-charcoal-900 tracking-tight leading-tight mb-4">
+          <h1 class="font-serif text-3xl sm:text-4xl text-charcoal-900 tracking-tight leading-tight mb-4">
             {{ product.name }}
           </h1>
-          
-          <!-- Production Description Details -->
-          <p class="text-stone-500 text-sm font-light leading-relaxed">
+          <p class="text-charcoal-500 text-base leading-relaxed">
             {{ product.description }}
           </p>
         </div>
 
-        <!-- Architectural Blueprint Specifications List -->
-        <div class="bg-white rounded-2xl border border-stone-200/60 p-6 shadow-sm">
-          <h3 class="text-[10px] font-bold uppercase tracking-widest text-stone-400 mb-4 pb-2 border-b border-stone-100">Commission Blueprint Matrix</h3>
-          
-          <dl class="space-y-3.5 text-xs">
-            <div class="flex justify-between items-center py-1">
-              <dt class="text-stone-400 uppercase tracking-wider font-medium text-[11px]">Primary Wood Stock</dt>
-              <dd class="font-serif text-stone-800 italic text-sm">{{ product.primary_species|default:"Custom Selection (Mvule / Mahogany)" }}</dd>
+        <!-- Specifications Ledger Sheet -->
+        <div class="bg-stone-50 rounded-2xl border border-charcoal-100 p-6">
+          <h3 class="text-[10px] font-bold uppercase tracking-[0.2em] text-charcoal-400 mb-6 pb-3 border-b border-charcoal-100 flex items-center gap-2">
+            <i data-lucide="clipboard-list" class="w-4 h-4"></i> Commission Specifications
+          </h3>
+          <dl class="space-y-4">
+            <div class="flex justify-between items-baseline">
+              <dt class="text-charcoal-400 text-xs uppercase tracking-wider font-mono">Timber Selection</dt>
+              <dd class="font-serif text-charcoal-800 italic text-sm">{{ product.primary_species|default:"Custom Selection" }}</dd>
             </div>
-            
-            <!-- Dimensional Metric Layout Row -->
-            <div class="flex justify-between items-center py-1 border-t border-stone-100/60">
-              <dt class="text-stone-400 uppercase tracking-wider font-medium text-[11px]">Spatial Dimensions</dt>
+            <div class="flex justify-between items-baseline pt-3 border-t border-charcoal-100/60">
+              <dt class="text-charcoal-400 text-xs uppercase tracking-wider font-mono">Dimensions</dt>
               <dd class="font-mono text-charcoal-900 font-medium text-sm">
                 {% if product.width_cm or product.height_cm or product.depth_cm %}
                   {{ product.dimensions_display }}
                 {% else %}
-                  Custom Tailored Sizing
+                  Custom Tailored
                 {% endif %}
               </dd>
             </div>
-
-            <div class="flex justify-between items-center py-1 border-t border-stone-100/60">
-              <dt class="text-stone-400 uppercase tracking-wider font-medium text-[11px]">Initial Configuration Base</dt>
-              <dd class="font-semibold text-charcoal-900 font-mono text-sm">KES {{ product.starting_price|floatformat:0 }}</dd>
+            <div class="flex justify-between items-baseline pt-3 border-t border-charcoal-100/60">
+              <dt class="text-charcoal-400 text-xs uppercase tracking-wider font-mono">Base Price</dt>
+              <dd class="font-semibold text-mahogany-700 font-mono text-lg">KES {{ product.starting_price|floatformat:0 }}</dd>
             </div>
-            <div class="flex justify-between items-center py-1 border-t border-stone-100/60">
-              <dt class="text-stone-400 uppercase tracking-wider font-medium text-[11px]">Standard Production Cycle</dt>
-              <dd class="font-medium text-stone-700 font-mono">{{ product.lead_time_days }} Days</dd>
+            <div class="flex justify-between items-baseline pt-3 border-t border-charcoal-100/60">
+              <dt class="text-charcoal-400 text-xs uppercase tracking-wider font-mono">Production Cycle</dt>
+              <dd class="font-medium text-charcoal-700 font-mono text-sm">{{ product.lead_time_days }} Studio Days</dd>
             </div>
           </dl>
         </div>
 
-        <!-- Direct Engagement Action Interfaces -->
-        <div class="flex flex-col sm:flex-row items-stretch gap-3.5">
-          <!-- Main Whatsapp Commission Route -->
-          <a href="{{ product.whatsapp_url }}" target="_blank" rel="noopener" class="flex-1 inline-flex items-center justify-center gap-2.5 bg-[#128C7E] hover:bg-[#0b665c] text-white px-6 py-4 rounded-xl text-xs uppercase tracking-widest font-semibold transition-colors shadow-sm">
-            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-            </svg>
-            Enquire via WhatsApp
+        <!-- Action Layout Interims -->
+        <div class="flex flex-col sm:flex-row items-stretch gap-3">
+          <a href="{{ product.whatsapp_url }}" target="_blank" rel="noopener" class="flex-1 inline-flex items-center justify-center gap-3 bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-4 rounded-xl text-sm uppercase tracking-wider font-semibold transition-all shadow-sm hover:shadow-md">
+            <i data-lucide="message-circle" class="w-5 h-5"></i> WhatsApp Inquiry
           </a>
-
-          <!-- Secondary Allocation Request Route -->
-          <a href="{% url 'storefront:waitlist' %}" class="inline-flex items-center justify-center border border-stone-300 bg-white text-stone-700 hover:bg-stone-50 hover:text-stone-900 px-6 py-4 rounded-xl text-xs uppercase tracking-widest font-semibold transition-colors">
-            Queue Waitlist Allocation
+          <a href="{% url 'storefront:waitlist' %}" class="inline-flex items-center justify-center border-2 border-charcoal-200 bg-white text-charcoal-700 hover:bg-charcoal-50 hover:border-charcoal-300 px-6 py-4 rounded-xl text-sm uppercase tracking-wider font-semibold transition-all">
+            <i data-lucide="calendar-plus" class="w-5 h-5 mr-2"></i> Join Waitlist
           </a>
+        </div>
+        
+        <!-- Trust Infrastructure Badges -->
+        <div class="grid grid-cols-3 gap-4 pt-4">
+          <div class="text-center p-3 rounded-xl bg-stone-50 border border-charcoal-50">
+            <i data-lucide="shield-check" class="w-5 h-5 text-mahogany-500 mx-auto mb-1"></i>
+            <p class="text-[10px] uppercase tracking-wider text-charcoal-500 font-bold">5yr Warranty</p>
+          </div>
+          <div class="text-center p-3 rounded-xl bg-stone-50 border border-charcoal-50">
+            <i data-lucide="leaf" class="w-5 h-5 text-mahogany-500 mx-auto mb-1"></i>
+            <p class="text-[10px] uppercase tracking-wider text-charcoal-500 font-bold">Sustainable</p>
+          </div>
+          <div class="text-center p-3 rounded-xl bg-stone-50 border border-charcoal-50">
+            <i data-lucide="truck" class="w-5 h-5 text-mahogany-500 mx-auto mb-1"></i>
+            <p class="text-[10px] uppercase tracking-wider text-charcoal-500 font-bold">Nationwide</p>
+          </div>
         </div>
       </div>
 
     </div>
   </div>
 </div>
-
-<!-- Dynamic Showcase View Switcher -->
-<script>
-function switchShowcase(url, type, element) {
-    const frame = document.getElementById('featured-viewport');
-    
-    if (element && element.parentElement) {
-        Array.from(element.parentElement.children).forEach(btn => {
-            btn.classList.remove('border-mahogany-600');
-            btn.classList.add('border-stone-200/80');
-        });
-        element.classList.add('border-mahogany-600');
-        element.classList.remove('border-stone-200/80');
-    }
-
-    if(type === 'VIDEO') {
-        frame.innerHTML = `<video src="${url}" class="w-full h-full object-cover object-center" controls autoplay muted loop playsinline></video>`;
-    } else {
-        frame.innerHTML = `<img src="${url}" class="w-full h-full object-cover object-center transition-transform duration-500 hover:scale-102">`;
-    }
-}
-</script>
-
 {% endblock %}

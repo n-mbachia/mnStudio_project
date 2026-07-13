@@ -1,12 +1,134 @@
 {% extends "base.html" %}
-{% block title %}Create Certificate{% endblock %}
-{% block page_title %}Certificate of Authenticity — {{ job.job_id }}{% endblock %}
+{% block title %}Create Certificate of Authenticity{% endblock %}
+
 {% block content %}
-<div class="max-w-2xl"><div class="card">
-  <form method="post" class="space-y-4">
-    {% csrf_token %}
-    {% for field in form %}<div><label class="label">{{ field.label }}</label>{{ field }}{% if field.help_text %}<p class="text-xs text-stone-400 mt-1">{{ field.help_text }}</p>{% endif %}</div>{% endfor %}
-    <div class="flex gap-3 pt-2"><button type="submit" class="btn-primary">Issue Certificate & Complete Job</button></div>
-  </form>
-</div></div>
+<div class="max-w-2xl mx-auto px-4 py-8">
+  <div class="mb-8">
+    <h1 class="font-serif text-4xl text-charcoal-900 mb-2">Certificate of Authenticity</h1>
+    <p class="text-stone-600">
+      Creating certificate for <span class="font-mono font-semibold text-mahogany-700">{{ job.job_id }}</span>
+    </p>
+  </div>
+
+  <div class="bg-white rounded-xl border border-stone-200 shadow-sm overflow-hidden">
+    <form method="post" class="space-y-6 p-8">
+      {% csrf_token %}
+
+      <!-- Piece Information -->
+      <fieldset class="border-b border-stone-100 pb-6">
+        <legend class="text-sm font-bold uppercase tracking-wider text-stone-400 mb-4">Piece Information</legend>
+        
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-semibold text-charcoal-900 mb-2">
+              {{ form.piece_name.label }}
+            </label>
+            {{ form.piece_name }}
+            {% if form.piece_name.help_text %}
+              <p class="text-xs text-stone-500 mt-1">{{ form.piece_name.help_text|safe }}</p>
+            {% endif %}
+            {% if form.piece_name.errors %}
+              <p class="text-xs text-red-600 mt-1">{{ form.piece_name.errors.0 }}</p>
+            {% endif %}
+          </div>
+
+          <div>
+            <label class="block text-sm font-semibold text-charcoal-900 mb-2">
+              {{ form.client_name_display.label }}
+            </label>
+            {{ form.client_name_display }}
+            {% if form.client_name_display.help_text %}
+              <p class="text-xs text-stone-500 mt-1">{{ form.client_name_display.help_text|safe }}</p>
+            {% endif %}
+            {% if form.client_name_display.errors %}
+              <p class="text-xs text-red-600 mt-1">{{ form.client_name_display.errors.0 }}</p>
+            {% endif %}
+          </div>
+        </div>
+      </fieldset>
+
+      <!-- Material Specifications -->
+      <fieldset class="border-b border-stone-100 pb-6">
+        <legend class="text-sm font-bold uppercase tracking-wider text-stone-400 mb-4">Material Specifications</legend>
+        
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-semibold text-charcoal-900 mb-2">
+              {{ form.species_used.label }}
+            </label>
+            {{ form.species_used }}
+            {% if form.species_used.help_text %}
+              <p class="text-xs text-stone-500 mt-1">{{ form.species_used.help_text|safe }}</p>
+            {% endif %}
+            {% if form.species_used.errors %}
+              <p class="text-xs text-red-600 mt-1">{{ form.species_used.errors.0 }}</p>
+            {% endif %}
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-semibold text-charcoal-900 mb-2">
+                {{ form.total_board_feet.label }}
+              </label>
+              {{ form.total_board_feet }}
+              {% if form.total_board_feet.errors %}
+                <p class="text-xs text-red-600 mt-1">{{ form.total_board_feet.errors.0 }}</p>
+              {% endif %}
+            </div>
+
+            <div>
+              <label class="block text-sm font-semibold text-charcoal-900 mb-2">
+                {{ form.primary_artisan.label }}
+              </label>
+              {{ form.primary_artisan }}
+              {% if form.primary_artisan.errors %}
+                <p class="text-xs text-red-600 mt-1">{{ form.primary_artisan.errors.0 }}</p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </fieldset>
+
+      <!-- Completion & Care -->
+      <fieldset class="pb-6">
+        <legend class="text-sm font-bold uppercase tracking-wider text-stone-400 mb-4">Completion & Care</legend>
+        
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-semibold text-charcoal-900 mb-2">
+              {{ form.completion_date.label }}
+            </label>
+            {{ form.completion_date }}
+            {% if form.completion_date.errors %}
+              <p class="text-xs text-red-600 mt-1">{{ form.completion_date.errors.0 }}</p>
+            {% endif %}
+          </div>
+
+          <div>
+            <label class="block text-sm font-semibold text-charcoal-900 mb-2">
+              {{ form.care_instructions.label }}
+            </label>
+            {{ form.care_instructions }}
+            {% if form.care_instructions.help_text %}
+              <p class="text-xs text-stone-500 mt-1">{{ form.care_instructions.help_text|safe }}</p>
+            {% endif %}
+            {% if form.care_instructions.errors %}
+              <p class="text-xs text-red-600 mt-1">{{ form.care_instructions.errors.0 }}</p>
+            {% endif %}
+          </div>
+        </div>
+      </fieldset>
+
+      <!-- Form Actions -->
+      <div class="flex gap-3 pt-4">
+        <button type="submit" class="inline-flex items-center gap-2 bg-mahogany-700 hover:bg-mahogany-600 text-white font-medium px-6 py-3 rounded-lg transition-colors shadow-sm">
+          <span>✓</span> Issue Certificate & Complete Job
+        </button>
+        <a href="javascript:history.back()" class="inline-flex items-center gap-2 bg-stone-100 hover:bg-stone-200 text-charcoal-900 font-medium px-6 py-3 rounded-lg transition-colors">
+          Cancel
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
 {% endblock %}

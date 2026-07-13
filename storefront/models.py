@@ -8,6 +8,7 @@ The waitlist is the Zero to One demand intelligence layer:
 """
 import urllib.parse
 from decimal import Decimal
+from types import SimpleNamespace
 from django.db import models
 from django.utils import timezone
 from django.utils.text import slugify
@@ -186,6 +187,24 @@ class AuctionLot(models.Model):
         if self.product:
             return self.product.primary_image_url
         return ""
+
+    @property
+    def display_media(self):
+        """
+        Returns a media-like object for templates so auction views can render
+        through the same media-first pattern used by the home and collection cards.
+        """
+        if self.image_url:
+            return SimpleNamespace(
+                media_type="IMAGE",
+                media_url=self.image_url,
+                thumbnail_url=self.image_url,
+            )
+
+        if self.product:
+            return self.product.media.first()
+
+        return None
 
     @property
     def display_dimensions(self):

@@ -1,12 +1,18 @@
+<!-- ./templates/base.html -->
+
 {% load static %}
 <!DOCTYPE html>
-<html lang="en" class="h-full bg-stone-50">
+<html lang="en" class="h-full bg-stone-50 scroll-smooth">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% block title %}MN Studio{% endblock %} — Bespoke Hardwood Furniture, Nairobi</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Alpine JS Activation -->
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <!-- Lucide Icons Global Injection Script -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght=0,400;0,600;1,400&family=Jost:wght=300;400;500;600&display=swap" rel="stylesheet">
   <script>
@@ -26,7 +32,6 @@
   <style>
     body { font-family: 'Jost', system-ui, sans-serif; }
     h1,h2,h3,.font-serif { font-family: 'Cormorant Garamond', Georgia, serif; }
-    /* Hardened link definitions with absolute fallbacks */
     .sidebar-link { @apply flex items-center gap-3 px-4 py-2.5 rounded-lg text-stone-300/90 hover:bg-white/[0.06] hover:text-white transition-all text-sm font-medium; }
     .sidebar-link.active { @apply bg-mahogany-700 text-white shadow-sm shadow-mahogany-950/40 font-semibold; }
     .card { @apply bg-white rounded-xl shadow-sm border border-stone-100 p-6; }
@@ -38,91 +43,156 @@
     .label { @apply block text-xs font-semibold text-stone-500 uppercase tracking-wider mb-1; }
     .table-header { @apply text-left text-xs font-semibold text-stone-400 uppercase tracking-wider py-3 px-4; }
     .table-cell { @apply py-3 px-4 text-sm text-stone-700 border-t border-stone-50; }
+    
+    /* Scroll-Triggered Reveal Infrastructure */
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+      will-change: opacity, transform;
+    }
+    .reveal.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
   </style>
   {% block extra_head %}{% endblock %}
 </head>
 <body class="h-full">
 {% block body %}
 
+<!-- TOAST MESSAGES: Django Message Infrastructure with Auto-Dismiss Loop -->
+<div aria-live="assertive" class="pointer-events-none fixed inset-0 z-50 flex flex-col items-end gap-3 px-4 py-6 sm:p-6" x-data="{ 
+  toasts: [
+    {% if messages %}
+      {% for m in messages %}
+      { id: {{ forloop.counter }}, text: '{{ m|escapejs }}', type: '{{ m.tags }}', show: true },
+      {% endfor %}
+    {% endif %}
+  ]
+}" x-init="toasts.forEach(t => setTimeout(() => t.show = false, 5000))">
+  <template x-for="toast in toasts" :key="toast.id">
+    <div x-show="toast.show" 
+         x-transition:enter="transform ease-out duration-300 transition"
+         x-transition:enter-start="translate-y-2 opacity-0 sm:translate-y-0 sm:translate-x-2"
+         x-transition:enter-end="translate-y-0 opacity-100 sm:translate-x-0"
+         x-transition:leave="transition ease-in duration-100"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="pointer-events-auto w-full max-w-sm overflow-hidden rounded-xl border bg-white p-4 shadow-lg ring-1 ring-black/5">
+      <div class="flex items-start gap-3">
+        <div class="shrink-0">
+          <template x-if="toast.type === 'success'">
+            <i data-lucide="check-circle" class="h-5 w-5 text-forest-600"></i>
+          </template>
+          <template x-if="toast.type === 'error'">
+            <i data-lucide="alert-triangle" class="h-5 w-5 text-red-600"></i>
+          </template>
+          <template x-if="toast.type !== 'success' && toast.type !== 'error'">
+            <i data-lucide="info" class="h-5 w-5 text-blue-600"></i>
+          </template>
+        </div>
+        <div class="flex-1 pt-0.5">
+          <p class="text-sm font-medium text-stone-900" x-text="toast.text"></p>
+        </div>
+        <div class="ml-4 flex shrink-0">
+          <button @click="toast.show = false" class="inline-flex rounded-md text-stone-400 hover:text-stone-500 focus:outline-none">
+            <span class="sr-only">Close</span>
+            <i data-lucide="x" class="h-4 w-4"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </template>
+</div>
+
 {% if user.is_authenticated %}
 <!-- ADMIN SHELL -->
 <div class="flex h-screen overflow-hidden" x-data="{ sidebarOpen: false }">
 
+  <!-- Mobile Back-drop overlay -->
+  <div x-show="sidebarOpen" @click="sidebarOpen = false" class="fixed inset-0 z-40 bg-charcoal-200/20 backdrop-blur-sm lg:hidden"></div>
+
   <!-- Sidebar Container -->
-  <aside class="w-64 bg-charcoal-200 flex flex-col shrink-0 hidden lg:flex border-r border-white/5">
-    <div class="p-6 border-b border-white/5 bg-charcoal-950/20">
-      <h1 class="font-serif text-2xl text-white tracking-wide">MN Studio</h1>
-      <p class="text-mahogany-500 text-xs mt-0.5 tracking-wider font-mono uppercase">Business OS</p>
-    </div>
-    
+  <aside :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'" class="fixed inset-y-0 left-0 z-1000 w-64 bg-charcoal-200/20 flex flex-col shrink-0 lg:static lg:translate-x-0 transition-transform duration-300 ease-in-out border-r border-white/5">
+    <div class="p-6 border-b border-white/5 bg-charcoal-200/20 flex flex-col gap-4">
+	  <div class="flex items-center justify-between w-full">
+		<!-- Upscaled Logo Integration -->
+		<a href="{% url 'dashboard' %}" class="block group">
+		  <img src="https://res.cloudinary.com/famfef4z/image/upload/v1783431102/mnStudio_ijiqh7.png" 
+		       alt="MN Studio Logo" 
+		       class="h-20 w-auto object-contain brightness-0 invert opacity-90 group-hover:opacity-100 transition-opacity">
+		</a>
+		<button @click="sidebarOpen = false" class="lg:hidden text-stone-400 hover:text-white">
+		  <i data-lucide="x" class="w-5 h-5"></i>
+		</button>
+	  </div>
+	  <p class="text-mahogany-500 text-[10px] tracking-wider font-mono uppercase">Business OS</p>
+	</div>
+		
     <nav class="flex-1 p-4 space-y-1.5 overflow-y-auto custom-scrollbar">
-      <!-- Operations Group -->
       <p class="text-[10px] font-bold text-mahogany-500 uppercase tracking-widest px-4 pt-2 pb-1">Operations</p>
       <a href="{% url 'dashboard' %}" class="sidebar-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
-        <svg class="w-4 h-4 shrink-0 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+        <i data-lucide="layout-dashboard" class="w-4 h-4 shrink-0 opacity-80"></i>
         <span>Dashboard</span>
       </a>
       <a href="{% url 'production:jobcard_list' %}" class="sidebar-link {% if request.resolver_match.namespace == 'production' %}active{% endif %}">
-        <svg class="w-4 h-4 shrink-0 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+        <i data-lucide="clipboard-list" class="w-4 h-4 shrink-0 opacity-80"></i>
         <span>Job Cards</span>
       </a>
       
-      <!-- CRM Group -->
       <p class="text-[10px] font-bold text-mahogany-500 uppercase tracking-widest px-4 pt-4 pb-1">CRM</p>
       <a href="{% url 'crm:client_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'client_list' %}active{% endif %}">
-        <svg class="w-4 h-4 shrink-0 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        <i data-lucide="users" class="w-4 h-4 shrink-0 opacity-80"></i>
         <span>Clients</span>
       </a>
       <a href="{% url 'crm:pipeline' %}" class="sidebar-link {% if request.resolver_match.url_name == 'pipeline' %}active{% endif %}">
-        <svg class="w-4 h-4 shrink-0 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+        <i data-lucide="git-pull-request" class="w-4 h-4 shrink-0 opacity-80"></i>
         <span>Pipeline</span>
       </a>
       
-      <!-- Finance Group -->
       <p class="text-[10px] font-bold text-mahogany-500 uppercase tracking-widest px-4 pt-4 pb-1">Finance</p>
       <a href="{% url 'ledger:quote_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'quote_list' %}active{% endif %}">
-        <svg class="w-4 h-4 shrink-0 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        <i data-lucide="file-text" class="w-4 h-4 shrink-0 opacity-80"></i>
         <span>Quotes</span>
       </a>
       <a href="{% url 'ledger:invoice_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'invoice_list' %}active{% endif %}">
-        <svg class="w-4 h-4 shrink-0 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2z"/></svg>
+        <i data-lucide="receipt" class="w-4 h-4 shrink-0 opacity-80"></i>
         <span>Invoices</span>
       </a>
       <a href="{% url 'ledger:compliance_dashboard' %}" class="sidebar-link {% if request.resolver_match.url_name == 'compliance_dashboard' %}active{% endif %}">
-        <svg class="w-4 h-4 shrink-0 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+        <i data-lucide="scale" class="w-4 h-4 shrink-0 opacity-80"></i>
         <span>Compliance</span>
       </a>
       
-      <!-- Supply Chain Group -->
       <p class="text-[10px] font-bold text-mahogany-500 uppercase tracking-widest px-4 pt-4 pb-1">Supply Chain</p>
       <a href="{% url 'partners:supplier_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'supplier_list' %}active{% endif %}">
-        <svg class="w-4 h-4 shrink-0 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+        <i data-lucide="building" class="w-4 h-4 shrink-0 opacity-80"></i>
         <span>Suppliers</span>
       </a>
       <a href="{% url 'partners:po_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'po_list' %}active{% endif %}">
-        <svg class="w-4 h-4 shrink-0 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+        <i data-lucide="shopping-bag" class="w-4 h-4 shrink-0 opacity-80"></i>
         <span>Purchase Orders</span>
       </a>
       <a href="{% url 'partners:artisan_list' %}" class="sidebar-link {% if request.resolver_match.url_name == 'artisan_list' %}active{% endif %}">
-        <svg class="w-4 h-4 shrink-0 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        <i data-lucide="wrench" class="w-4 h-4 shrink-0 opacity-80"></i>
         <span>Artisans</span>
       </a>
       
-      <!-- Storefront Group -->
       <p class="text-[10px] font-bold text-mahogany-500 uppercase tracking-widest px-4 pt-4 pb-1">Storefront</p>
       <a href="{% url 'storefront:product_list' %}" class="sidebar-link {% if request.resolver_match.namespace == 'storefront' and request.resolver_match.url_name == 'product_list' %}active{% endif %}">
-        <svg class="w-4 h-4 shrink-0 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+        <i data-lucide="layers" class="w-4 h-4 shrink-0 opacity-80"></i>
         <span>Catalogue</span>
       </a>
       <a href="{% url 'storefront:auction_list' %}" class="sidebar-link {% if request.resolver_match.namespace == 'storefront' and 'auction' in request.resolver_match.url_name %}active{% endif %}">
-        <svg class="w-4 h-4 shrink-0 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        <i data-lucide="gavel" class="w-4 h-4 shrink-0 opacity-80"></i>
         <span>Live Auctions</span>
       </a>
     </nav>
     
     <div class="p-4 border-t border-white/5 bg-charcoal-950/10">
       <a href="{% url 'logout' %}" class="sidebar-link text-stone-400 hover:text-red-400 hover:bg-red-950/20">
-        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+        <i data-lucide="log-out" class="w-4 h-4 shrink-0"></i>
         <span>Sign Out</span>
       </a>
     </div>
@@ -132,29 +202,20 @@
   <div class="flex-1 flex flex-col overflow-hidden">
     <!-- Top bar -->
     <header class="bg-white border-b border-stone-100 px-6 py-4 flex items-center justify-between shrink-0">
-      <div>
-        <h2 class="font-serif text-xl text-charcoal-900">{% block page_title %}Dashboard{% endblock %}</h2>
-        {% block breadcrumb %}<p class="text-xs text-stone-400 mt-0.5">MN Studio Business OS</p>{% endblock %}
+      <div class="flex items-center gap-4">
+        <button @click="sidebarOpen = true" class="lg:hidden text-stone-600 hover:text-stone-900">
+          <i data-lucide="menu" class="w-6 h-6"></i>
+        </button>
+        <div>
+          <h2 class="font-serif text-xl text-charcoal-900">{% block page_title %}Dashboard{% endblock %}</h2>
+          {% block breadcrumb %}<p class="text-xs text-stone-400 mt-0.5">MN Studio Business OS</p>{% endblock %}
+        </div>
       </div>
       <div class="flex items-center gap-3">
         {% block header_actions %}{% endblock %}
         <span class="text-sm text-stone-500 font-medium">{{ user.get_full_name|default:user.username }}</span>
       </div>
     </header>
-
-    <!-- Messages -->
-    {% if messages %}
-    <div class="px-6 pt-4 space-y-2">
-      {% for m in messages %}
-      <div class="flex items-center gap-3 px-4 py-3 rounded-lg text-sm
-        {% if m.tags == 'success' %}bg-forest-50 text-forest-800 border border-forest-200
-        {% elif m.tags == 'error' %}bg-red-50 text-red-800 border border-red-200
-        {% else %}bg-blue-50 text-blue-800 border border-blue-200{% endif %}">
-        {{ m }}
-      </div>
-      {% endfor %}
-    </div>
-    {% endif %}
 
     <!-- Page content -->
     <main class="flex-1 overflow-y-auto p-6">
@@ -165,12 +226,102 @@
 
 {% else %}
 <!-- PUBLIC SHELL -->
-<div class="min-h-screen">
+<div class="min-h-screen pt-20" x-data="{ isScrolled: false, mobileMenuOpen: false }" @scroll.window="isScrolled = (window.scrollY > 10)">
+  
+  <!-- STICKY GLASSMORPHISM NAVBAR -->
+  <nav :class="isScrolled ? 'bg-charcoal-500/80 backdrop-blur-md border-white/10 shadow-lg py-4' : 'bg-transparent border-transparent py-6'"
+       class="fixed top-0 left-0 right-0 z-40 border-b transition-all duration-300 ease-in-out text-stone-500">
+    <div class="max-w-6xl mx-auto px-6 sm:px-8 flex items-center justify-between">
+	  <a href="/" class="block group">
+		<!-- Upscaled Dynamic Logo Integration -->
+		<img src="https://res.cloudinary.com/famfef4z/image/upload/v1783431102/mnStudio_ijiqh7.png" 
+		     alt="MN Studio Logo" 
+		     class="h-8 w-auto object-contain transition-all duration-300 group-hover:opacity-80"
+		     :class="isScrolled ? 'brightness-0' : 'brightness-0 invert'">
+	  </a>
+      
+      <!-- Desktop Actions -->
+      <div class="hidden md:flex items-center gap-8 text-sm font-medium tracking-wide">
+        <a href="{% url 'storefront:product_list' %}" class="hover:text-mahogany-400 transition-colors">The Registry Collection</a>
+        <a href="{% url 'storefront:auction_list' %}" class="hover:text-mahogany-400 transition-colors">Vault Auctions</a>
+        <a href="{% url 'storefront:waitlist' %}" class="inline-flex items-center gap-1.5 bg-mahogany-700 hover:bg-mahogany-600 px-4 py-2 rounded-lg transition-colors text-white">
+          <span>Request Commission</span>
+          <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
+        </a>
+      </div>
+
+      <!-- Mobile Menu Trigger -->
+      <button @click="mobileMenuOpen = !mobileMenuOpen" class="md:hidden text-white focus:outline-none">
+        <template x-if="!mobileMenuOpen">
+          <i data-lucide="menu" class="w-6 h-6"></i>
+        </template>
+        <template x-if="mobileMenuOpen">
+          <i data-lucide="x" class="w-6 h-6"></i>
+        </template>
+      </button>
+    </div>
+
+    <!-- RESPONSIVE MOBILE SLIDE-DOWN NAVIGATION OVERLAY MENU -->
+    <div x-show="mobileMenuOpen"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="-translate-y-full opacity-0"
+         x-transition:enter-end="translate-y-0 opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="translate-y-0 opacity-100"
+         x-transition:leave-end="-translate-y-full opacity-0"
+         class="absolute top-full left-0 right-0 bg-charcoal-900/95 backdrop-blur-lg border-b border-white/10 shadow-2xl md:hidden overflow-hidden z-30">
+      <div class="px-6 py-8 flex flex-col gap-5 text-lg font-medium">
+        <a href="{% url 'storefront:product_list' %}" @click="mobileMenuOpen = false" class="py-2 hover:text-mahogany-400 transition-colors border-b border-white/5 flex items-center justify-between">
+          <span>The Registry Collection</span>
+          <i data-lucide="chevron-right" class="w-4 h-4 opacity-60"></i>
+        </a>
+        <a href="{% url 'storefront:auction_list' %}" @click="mobileMenuOpen = false" class="py-2 hover:text-mahogany-400 transition-colors border-b border-white/5 flex items-center justify-between">
+          <span>Vault Auctions</span>
+          <i data-lucide="gavel" class="w-4 h-4 opacity-60"></i>
+        </a>
+        <a href="{% url 'storefront:waitlist' %}" @click="mobileMenuOpen = false" class="mt-2 text-center bg-mahogany-700 text-white py-3 rounded-lg flex items-center justify-center gap-2">
+          <span>Request Commission</span>
+          <i data-lucide="edit-3" class="w-4 h-4"></i>
+        </a>
+      </div>
+    </div>
+  </nav>
+
   {% block public_content %}{% endblock %}
 </div>
 {% endif %}
 
 {% endblock body %}
 {% block extra_scripts %}{% endblock %}
+
+<!-- ENGINE HOOK: Initialize Lucide and Intersection Observer Reveal Rules -->
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    // 1. Render all dynamic Lucide icon frameworks
+    if (typeof lucide !== 'undefined') {
+      lucide.createIcons();
+    }
+
+    // 2. Setup Intersection Observer for scroll-triggered animation elements
+    const revealElements = document.querySelectorAll('.reveal');
+    if (revealElements.length > 0) {
+      const revealObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('active');
+            // Unobserve after activating to preserve system performance
+            observer.unobserve(entry.target);
+          }
+        });
+      }, {
+        root: null,
+        threshold: 0.12,
+        rootMargin: '0px 0px -40px 0px'
+      });
+
+      revealElements.forEach(el => revealObserver.observe(el));
+    }
+  });
+</script>
 </body>
 </html>

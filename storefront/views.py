@@ -1,21 +1,62 @@
-#	./storefront/views.py
+# ./storefront/views.py
 
 from django.views.generic import ListView, DetailView, CreateView, TemplateView, View
 from django.contrib import messages
 from django.shortcuts import redirect, get_object_or_404, render
 from django.urls import reverse_lazy
 from django import forms as django_forms
-from .models import Product, AuctionLot, AuctionStatus, Waitlist, AuctionBid, BudgetRange
+from django.db.models import Q
+from .models import Product, AuctionLot, ProductCategory, AuctionStatus, Waitlist, AuctionBid, BudgetRange
 from crm.models import ClientProfile
+
+
+class HomeView(TemplateView):
+    template_name = "storefront/home.html"
+
+    def get_context_data(self, **kwargs):
+        cxt = super().get_context_data(**kwargs)
+
+        # 1. Featured products for The Registry (3 items to fill the 3-col grid)
+        featured_products = (
+            Product.objects
+            .filter(is_active=True, is_featured=True)
+            .prefetch_related("media")[:3]
+        )
+
+        # 2. Derive hero from featured set — prefer one with media
+        hero_product = None
+        for product in featured_products:
+            if product.media.exists():
+                hero_product = product
+                break
+
+        # Fallback: first featured product even if it has no media
+        if hero_product is None:
+            hero_product = featured_products.first()
+
+        cxt["featured"] = featured_products
+        cxt["hero_product"] = hero_product
+        cxt["hero_media"] = hero_product.media.first() if hero_product else None
+
+        # 3. Active auctions (3 items to fill the 3-col grid)
+        cxt["active_auctions"] = (
+            AuctionLot.objects
+            .filter(status__in=[AuctionStatus.ACTIVE, AuctionStatus.EXTENDED])
+            .select_related("product")
+            .prefetch_related("product__media")[:3]
+        )
+
+        return cxt
 
 
 class ProductListView(ListView):
     model = Product
     template_name = "storefront/product_list.html"
     context_object_name = "products"
+    paginate_by = 12
 
     def get_queryset(self):
-        qs = Product.objects.filter(is_active=True)
+        qs = Product.objects.filter(is_active=True).prefetch_related("media")
         cat = self.request.GET.get("cat", "")
         if cat:
             qs = qs.filter(category=cat)
@@ -23,27 +64,19 @@ class ProductListView(ListView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        from .models import ProductCategory, AuctionLot, AuctionStatus
         
         ctx["categories"] = ProductCategory.choices
-        
-        # 1. Pull the 3 active featured items for the media-flashing registry rows (Optimized prefetch)
-        featured_products = Product.objects.filter(is_featured=True, is_active=True).prefetch_related('media')
-        ctx["featured"] = featured_products[:3]
-        
-        # 2. Isolate the very first item to serve your hero banner layout accurately
-        hero_showcase = featured_products.first()
-        ctx["hero_product"] = hero_showcase
-        if hero_showcase:
-            # Grabs the fallback property or the first item in the media pool safely
-            ctx["hero_media"] = hero_showcase.media.first()
-
-        # 3. Correctly fetch live auction logs matching your model properties
-        # Optimized with select_related('product') to fetch spatial data and blueprint fields efficiently
-        ctx["active_auctions"] = AuctionLot.objects.filter(
-            status__in=[AuctionStatus.ACTIVE, AuctionStatus.EXTENDED]
-        ).select_related('product')[:3]
-        
+        ctx["featured"] = (
+            Product.objects
+            .filter(is_featured=True, is_active=True)
+            .prefetch_related("media")[:3]
+        )
+        ctx["active_auctions"] = (
+            AuctionLot.objects
+            .filter(status__in=[AuctionStatus.ACTIVE, AuctionStatus.EXTENDED])
+            .select_related("product")
+            .prefetch_related("product__media")[:6]
+        )
         return ctx
 
 
@@ -54,10 +87,8 @@ class ProductDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
-        # Context is updated to handle robust media items instead of just raw static images
         ctx["media_items"] = self.object.media.all()
         
-        # Robustness check: flag whether frontend layout switcher should present the blueprint tab
         ctx["has_architectural_specs"] = bool(
             self.object.architectural_drawing_url or 
             (self.object.width_cm and self.object.height_cm and self.object.depth_cm)
@@ -71,7 +102,6 @@ class AuctionListView(ListView):
     context_object_name = "lots"
 
     def get_queryset(self):
-        # Prefetch parent product to natively grab dynamic structural specs down the wire
         return AuctionLot.objects.filter(
             status__in=[AuctionStatus.ACTIVE, AuctionStatus.EXTENDED]
         ).select_related("product").order_by("end_time")
@@ -83,14 +113,12 @@ class AuctionDetailView(DetailView):
     context_object_name = "lot"
 
     def get_queryset(self):
-        # Ensure fallback product data is always loaded instantly
         return AuctionLot.objects.select_related("product")
 
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx["bids"] = self.object.bids.select_related("bidder").order_by("-amount")[:10]
         
-        # Robustness check for auction pages: determine structural sizing availability
         ctx["has_architectural_specs"] = bool(
             self.object.display_blueprint_url or 
             (self.object.product and self.object.product.width_cm)
@@ -115,12 +143,10 @@ class PlaceBidView(View):
             messages.error(request, "Invalid bid amount.")
             return redirect("storefront:auction_detail", pk=pk)
 
-        # Unified lookup query: search for matching phone OR matching email
-        from django.db.models import Q
+        # Unified lookup: search for matching phone OR matching email
         client = ClientProfile.objects.filter(Q(phone=phone) | Q(email=email)).first()
 
         if client:
-            # Safely patch missing or updated details onto the found profile identity
             updated = False
             if name and client.name != name:
                 client.name = name
@@ -134,14 +160,12 @@ class PlaceBidView(View):
             if updated:
                 client.save()
         else:
-            # Instantiate a clean record if no parts match existing accounts
             client = ClientProfile.objects.create(
                 name=name,
                 email=email,
                 phone=phone
             )
 
-        # Process ledger mechanics — passing the 'phone' variable here
         success, msg = lot.place_bid(bidder=client, amount=amount, phone=phone)
         
         if success:
@@ -164,7 +188,6 @@ class WaitlistJoinView(View):
         
         email = data.get("email", "").strip()
         
-        # Check if the email is already registered on the waitlist
         exists = Waitlist.objects.filter(email=email).exists()
         
         if exists:
@@ -172,7 +195,6 @@ class WaitlistJoinView(View):
             return redirect("storefront:waitlist_success")
             
         try:
-            # Instantiate the object directly to trigger Cloudinary's file upload handler
             waitlist_entry = Waitlist(
                 email=email,
                 name=data.get("name", ""),
@@ -180,9 +202,9 @@ class WaitlistJoinView(View):
                 piece_of_interest=data.get("piece_of_interest", ""),
                 budget_range=data.get("budget_range", ""),
                 timeline_months=int(data.get("timeline_months", 3)),
-                reference_image=files.get("reference_image") # Cloudinary safely streams this now
+                reference_image=files.get("reference_image")
             )
-            waitlist_entry.save() # Triggers storage pipeline
+            waitlist_entry.save()
             
             messages.success(request, "You've been added to our waiting list. We'll be in touch!")
         except Exception as e:
