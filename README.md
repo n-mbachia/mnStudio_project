@@ -30,24 +30,18 @@ mnstudio_project/
 ### 1. Clone & Install
 
 ```bash
-git clone https://github.com/your-org/mnstudio.git
+git clone https://github.com/n-mbachia/mnStudio_project.git
 cd mnstudio
 python -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 2. Configure Environment
+### 2. Spin up all services (Web, DB, Redis, Celery)
+docker compose up --build
 
-```bash
-cp .env.example .env
-# Edit .env with your PostgreSQL, Redis, Cloudinary, M-Pesa, and Africa's Talking credentials
-```
-
-### 3. Database Setup
-
-```bash
-python manage.py migrate
-python manage.py seed_demo   # Creates admin user + demo data
+### 3. Initialize database & seed demo data (Run in a separate terminal)
+docker compose exec web python manage.py migrate
+docker compose exec web python manage.py seed_demoConfigure Environment
 ```
 
 ### 4. Run

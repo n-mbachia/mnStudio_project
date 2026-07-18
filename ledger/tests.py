@@ -6,6 +6,7 @@ compute_period_obligations() — ensuring correct statutory bases.
 
 Run: python manage.py test ledger.tests
 """
+import datetime
 from decimal import Decimal
 from django.test import TestCase
 from django.contrib.auth.models import User
@@ -41,7 +42,7 @@ class ComplianceServiceTest(TestCase):
         Payment.objects.create(
             invoice=invoice, amount=Decimal(str(amount)),
             method=PaymentMethod.MPESA, status=PaymentStatus.CONFIRMED,
-            paid_at=timezone.datetime(year, month, 15, tzinfo=timezone.utc),
+            paid_at = timezone.datetime(year, month, 15, tzinfo=datetime.timezone.utc),
         )
         return invoice
 
@@ -127,7 +128,7 @@ class ComplianceServiceTest(TestCase):
         Payment.objects.create(
             invoice=invoice, amount=Decimal("60000"),
             method=PaymentMethod.BANK, status=PaymentStatus.CONFIRMED,
-            paid_at=timezone.datetime(2025, 10, 5, tzinfo=timezone.utc),  # October
+            paid_at = timezone.datetime(2025, 10, 5, tzinfo=datetime.timezone.utc),  # October
         )
 
         sep_result = compute_period_obligations(2025, 9)  # September — no payment

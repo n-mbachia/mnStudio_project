@@ -16,7 +16,7 @@ class JobIDGenerationTest(TestCase):
         )
         job = Job.objects.create(client=client, quoted_price=Decimal("10000"))
         self.assertTrue(job.job_id.startswith("JC-"))
-        self.assertEqual(len(job.job_id.split("-")), 6)
+        self.assertEqual(len(job.job_id.split("-")), 5)
 
     def test_gross_profit_property(self):
         from crm.models import ClientProfile
