@@ -19,28 +19,28 @@
       
       <!-- Left: Copy -->
       <div class="order-2 lg:order-1 animate-fade-in-up">
-        <div class="inline-flex items-center gap-2 border border-mahogany-500/30 bg-mahogany-950/40 backdrop-blur-sm px-4 py-1.5 rounded-full mb-8">
+        <div class="inline-flex items-center gap-2 border border-stone-500 bg-mahogany-950/40 backdrop-blur-sm px-4 py-1.5 rounded-full mb-8">
           <span class="w-2 h-2 rounded-full bg-mahogany-500 animate-pulse"></span>
           <p class="text-mahogany-400 text-xs uppercase tracking-[0.2em] font-medium">Kiambu · Est. 2024</p>
         </div>
         
         <h1 class="font-serif text-5xl sm:text-6xl lg:text-7xl text-stone-400 leading-[1.05] tracking-tight mb-6">
           Furniture <br class="hidden sm:block">
-          <span class="text-mahogany-400 italic font-normal">built to outlast</span> <br>
+          <span class="text-mahogany-400 italic font-normal">crafted to outlast</span> <br>
           the trend.
         </h1>
         
         <p class="text-charcoal-400 text-lg max-w-lg mb-10 font-light leading-relaxed">
-          Every piece is an intentional commission — hand-shaped from sustainably sourced African hardwood, 
+          Every piece ever commissioned is crafted by hand from sustainably sourced African hardwood, 
           finished with organic oils, and issued with a unique Certificate of Authenticity.
         </p>
         
         <div class="flex flex-col sm:flex-row flex-wrap gap-4">
-          <a href="{% url 'storefront:product_list' %}" class="group inline-flex items-center justify-center gap-3 bg-mahogany-700 hover:bg-mahogany-600 text-white px-8 py-4 rounded-xl font-medium text-base transition-all shadow-lg shadow-mahogany-950/30 hover:shadow-xl hover:shadow-mahogany-950/40 hover:-translate-y-0.5">
+          <a href="{% url 'storefront:product_list' %}" class="group inline-flex items-center justify-center gap-3 bg-mahogany-700 hover:bg-mahogany-600 text-charcoal-200 px-8 py-4 rounded-xl font-medium text-base transition-all shadow-lg shadow-mahogany-950/30 hover:shadow-xl hover:shadow-mahogany-950/40 hover:-translate-y-0.5">
             Explore Collection 
             <i data-lucide="arrow-right" class="w-4 h-4 transition-transform group-hover:translate-x-1"></i>
           </a>
-          <a href="{% url 'storefront:waitlist' %}" class="inline-flex items-center justify-center gap-2 border border-black/15 text-charcoal-300 hover:text-mahogany-500 hover:bg-white/5 px-8 py-4 rounded-xl font-medium text-base transition-all backdrop-blur-sm">
+          <a href="{% url 'storefront:waitlist' %}" class="inline-flex items-center justify-center gap-2 border border-mahogany-700 text-charcoal-500 hover:text-mahogany-500 hover:bg-white/5 px-8 py-4 rounded-xl font-medium text-base transition-all backdrop-blur-sm">
             Request Commission
           </a>
         </div>
@@ -48,12 +48,12 @@
         <!-- Stats -->
         <div class="mt-16 pt-8 border-t border-white/5 grid grid-cols-3 gap-8">
           <div>
-            <p class="font-serif text-3xl text-stone-400">150+</p>
-            <p class="text-xs text-charcoal-500 uppercase tracking-wider mt-1">Pieces Crafted</p>
+            <p class="font-serif text-3xl text-stone-400">Uniquely</p>
+            <p class="text-xs text-charcoal-500 uppercase tracking-wider mt-1">Crafted pieces</p>
           </div>
           <div>
-            <p class="font-serif text-3xl text-stone-400">12</p>
-            <p class="text-xs text-charcoal-500 uppercase tracking-wider mt-1">Wood Species</p>
+            <p class="font-serif text-3xl text-stone-400">6+ Wood</p>
+            <p class="text-xs text-charcoal-500 uppercase tracking-wider mt-1">Species to select from</p>
           </div>
           <div>
             <p class="font-serif text-3xl text-stone-500">5yr</p>
@@ -65,7 +65,7 @@
       <!-- Right: Hero Media -->
       <div class="order-1 lg:order-2 relative">
         {% if hero_product %}
-        <a href="{% url 'storefront:product_detail' hero_product.slug %}" class="block group relative aspect-[4/5] rounded-2xl overflow-hidden border border-mahogany-500/30 bg-charcoal-900 shadow-2xl transition-all duration-700 hover:border-mahogany-500/50 hover:shadow-mahogany-950/50">
+        <a href="{% url 'storefront:product_detail' hero_product.slug %}" class="block group relative aspect-[4/5] rounded-2xl overflow-hidden border border-stone-500 bg-charcoal-900 shadow-2xl transition-all duration-700 hover:border-mahogany-500/50 hover:shadow-mahogany-950/50">
           {% if hero_media %}
             {% if hero_media.media_type == 'VIDEO' %}
               <video src="{{ hero_media.media_url }}" class="absolute inset-0 w-full h-full object-cover transition-all duration-700 opacity-80 group-hover:opacity-70 group-hover:scale-105" autoplay muted loop playsinline></video>
@@ -139,11 +139,11 @@
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-12 gap-4 reveal">
       <div>
-        <p class="text-xs font-bold uppercase tracking-[0.2em] text-mahogany-600 mb-3">Curated Selection</p>
-        <h2 class="font-serif text-4xl sm:text-5xl text-charcoal-900 tracking-tight">The Registry Catalog</h2>
-        <p class="text-charcoal-500 text-base mt-2">Starting prices for bespoke configurations.</p>
+        <p class="text-xs font-bold uppercase tracking-[0.2em] text-mahogany-500 mb-3">Curated Selection</p>
+        <h2 class="font-serif text-4xl sm:text-5xl text-stone-400 tracking-tight">The Registry Catalog</h2>
+        <!-- p class="text-charcoal-500 text-base mt-2">Starting prices for bespoke configurations.</p -->
       </div>
-      <a href="{% url 'storefront:product_list' %}" class="group inline-flex items-center gap-2 text-sm font-semibold text-mahogany-700 hover:text-mahogany-800 transition-colors">
+      <a href="{% url 'storefront:product_list' %}" class="group inline-flex items-center gap-2 text-sm font-semibold text-mahogany-500 hover:text-mahogany-800 transition-colors">
         View full catalog
         <i data-lucide="arrow-right" class="w-4 h-4 transition-transform group-hover:translate-x-1"></i>
       </a>
@@ -171,7 +171,7 @@
           
           <!-- Category badge -->
           <div class="absolute top-4 left-4">
-            <span class="inline-flex items-center px-3 py-1 rounded-full bg-white/90 backdrop-blur-sm text-[10px] font-bold uppercase tracking-wider text-charcoal-700 shadow-sm">
+            <span class="inline-flex items-center px-3 py-1 rounded-full bg-white-90 backdrop-blur-sm text-[10px] font-bold uppercase tracking-wider text-charcoal-1000 shadow-sm">
               {{ product.get_category_display }}
             </span>
           </div>
@@ -184,17 +184,33 @@
           <p class="text-sm text-charcoal-500 font-light line-clamp-2 mb-4">{{ product.description }}</p>
           
           <div class="pt-4 border-t border-charcoal-100 flex items-center justify-between">
-            <div>
-              <p class="text-[10px] font-bold uppercase tracking-wider text-charcoal-400">From</p>
-              <p class="text-lg font-semibold text-charcoal-900 font-mono">KES {{ product.starting_price|floatformat:0 }}</p>
-            </div>
+            {% load humanize %}
+
+			<div>
+			  {% if product.starting_price %}
+				<p class="text-[10px] font-bold uppercase tracking-wider text-charcoal-400">From</p>
+				<p class="text-lg font-semibold text-charcoal-900 font-mono">
+				  KES {{ product.starting_price|floatformat:2|intcomma|slice:":-3" }}<sub class="text-xs font-normal">.{{ product.starting_price|floatformat:2|slice:"-2:" }}</sub>
+				</p>
+			  {% else %}
+			    <!-- Change the number to business no -->
+				<a 
+				  href="https://wa.me/254700000000?text=Inquiry%20about%20{{ product.title|urlencode }}"
+				  target="_blank" 
+				  rel="noopener noreferrer"
+				  class="inline-flex items-center gap-1.5 text-sm font-medium text-emerald-600 hover:text-emerald-700"
+				>
+				  Inquire on WhatsApp
+				</a>
+			  {% endif %}
+			</div>
             <div class="text-right">
               <p class="text-[10px] font-bold uppercase tracking-wider text-charcoal-400">Lead Time</p>
               <p class="text-sm text-charcoal-600">~{{ product.lead_time_days }} Days</p>
             </div>
           </div>
           
-          <a href="{% url 'storefront:product_detail' product.slug %}" class="mt-4 flex items-center justify-center gap-2 w-full py-3 rounded-xl border border-charcoal-200 text-sm font-medium text-charcoal-600 hover:bg-charcoal-900 hover:text-white hover:border-charcoal-900 transition-all">
+          <a href="{% url 'storefront:product_detail' product.slug %}" class="mt-4 flex items-center justify-center gap-2 w-full py-3 rounded-xl border border-charcoal-100 text-sm font-medium text-stone-500 group-hover:bg-mahogany-500 group-hover:text-white hover:border-charcoal-900 transition-all">
             View Details
             <i data-lucide="arrow-up-right" class="w-4 h-4"></i>
           </a>

@@ -14,9 +14,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements and install Python packages
+# Copy requirements and install Python packages and restart statics
 COPY requirements.txt /app/
 RUN pip install --no-cache-dir -r requirements.txt
+RUN python manage.py collectstatic --no-input
 
 # Copy the rest of the project code into the container
 COPY . /app/

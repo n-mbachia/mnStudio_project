@@ -26,6 +26,7 @@ DEBUG = env("DEBUG", default=False) # changed from True
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["localhost", "127.0.0.1", "web"])
 
 INSTALLED_APPS = [
+	"django.contrib.humanize",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
